@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Electron-builder output
+dist/
+
+# PyInstaller build output (foolai_backend.exe is 300+ MB)
+backend_dist/
+build/
+*.spec
+
+# Upscayl binary + model files (too large for git, see resources/upscayl/SETUP.md)
+resources/upscayl/bin/
+resources/upscayl/models/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/

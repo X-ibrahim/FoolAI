@@ -1,0 +1,42 @@
+{
+  "name": "foolai",
+  "version": "3.0.0",
+  "description": "FoolAI — Humanize Photos & Remove Watermarks",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win --x64",
+    "build:backend": "pip install pyinstaller iopaint && pyinstaller --onefile --noconsole --name foolai_backend backend/server.py && mkdir -p backend_dist && cp dist/foolai_backend.exe backend_dist/"
+  },
+  "build": {
+    "appId": "com.roninprx.foolai",
+    "productName": "FoolAI",
+    "directories": { "output": "dist" },
+    "win": {
+      "target": "portable",
+      "icon": "assets/icon.png"
+    },
+    "extraResources": [
+      {
+        "from": "backend_dist/",
+        "to":   "backend/",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "resources/upscayl/",
+        "to":   "upscayl/",
+        "filter": ["**/*"]
+      }
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "assets/**"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^36.3.1",
+    "electron-builder": "^26.0.12"
+  }
+}
