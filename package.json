@@ -11,7 +11,9 @@
   "build": {
     "appId": "com.roninprx.foolai",
     "productName": "FoolAI",
-    "directories": { "output": "dist" },
+    "directories": {
+      "output": "dist"
+    },
     "win": {
       "target": "portable",
       "icon": "assets/icon.png"
@@ -19,13 +21,17 @@
     "extraResources": [
       {
         "from": "backend_dist/",
-        "to":   "backend/",
-        "filter": ["**/*"]
+        "to": "backend/",
+        "filter": [
+          "**/*"
+        ]
       },
       {
         "from": "resources/upscayl/",
-        "to":   "upscayl/",
-        "filter": ["**/*"]
+        "to": "upscayl/",
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "files": [
@@ -37,6 +43,7 @@
   },
   "devDependencies": {
     "electron": "^36.3.1",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "playwright": "^1.60.0"
   }
 }

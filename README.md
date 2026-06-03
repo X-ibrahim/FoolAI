@@ -4,6 +4,15 @@ A desktop app for AI-powered image processing. Three tools in one dark, minimal 
 
 ---
 
+## Screenshots
+
+| | |
+|---|---|
+| ![Home — mode selector](assets/screenshots/01-home.png) | ![Humanize Photos](assets/screenshots/02-humanize.png) |
+| ![Remove Watermark](assets/screenshots/03-watermark.png) | ![AI Upscale](assets/screenshots/04-upscale.png) |
+
+---
+
 ## Features
 
 ### 👻 Humanize Photos
