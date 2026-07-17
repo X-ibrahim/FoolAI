@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // Window controls
@@ -20,4 +20,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   checkUpscaylBinary: ()      => ipcRenderer.invoke('check-upscale-binary'),
   upscaylImage:     (payload) => ipcRenderer.invoke('upscayl-image', payload),
   onUpscaylProgress:(cb)      => ipcRenderer.on('upscayl-progress', (_, d) => cb(d)),
+  onUpscaylLog:     (cb)      => ipcRenderer.on('upscayl-log', (_, msg) => cb(msg)),
+  // Web Optimize
+  optimizeImage:    (payload) => ipcRenderer.invoke('optimize-image', payload),
+  // File path resolution (replaces deprecated file.path)
+  getFilePath:      (file)    => webUtils.getPathForFile(file),
 });

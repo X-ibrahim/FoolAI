@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const { spawn, execFile } = require('child_process');
 const http = require('http');
 
@@ -101,6 +102,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: false,
       preload: path.join(__dirname, 'preload.js')
     }
   });
@@ -156,6 +158,40 @@ ipcMain.handle('check-backend', async () => {
   });
 });
 
+// ── Web Optimize (Sharp) ──
+ipcMain.handle('optimize-image', async (event, { filePath, outputDir, format, quality, maxWidth, stripMeta }) => {
+  try {
+    const sharp = require('sharp');
+    const originalSize = fs.statSync(filePath).size;
+    const nameNoExt = path.parse(filePath).name;
+    const outExt = format === 'jpeg' ? 'jpg' : format;
+    const outFile = path.join(outputDir, `${nameNoExt}_opt.${outExt}`);
+
+    let pipeline = sharp(filePath);
+
+    if (maxWidth && maxWidth > 0) {
+      pipeline = pipeline.resize({ width: maxWidth, withoutEnlargement: true });
+    }
+
+    if (!stripMeta) {
+      pipeline = pipeline.withMetadata();
+    }
+
+    switch (format) {
+      case 'webp': pipeline = pipeline.webp({ quality, effort: 4 }); break;
+      case 'jpeg': pipeline = pipeline.jpeg({ quality, mozjpeg: true, progressive: true }); break;
+      case 'avif': pipeline = pipeline.avif({ quality, effort: 4 }); break;
+      case 'png':  pipeline = pipeline.png({ compressionLevel: 9, effort: 9 }); break;
+    }
+
+    await pipeline.toFile(outFile);
+    const finalSize = fs.statSync(outFile).size;
+    return { outFile, originalSize, finalSize };
+  } catch (e) {
+    return { error: e.message };
+  }
+});
+
 // ── Upscayl binary paths (mirrors Upscayl's get-resource-paths.ts) ──
 function getUpscaylPaths() {
   const isDev = !app.isPackaged;
@@ -177,17 +213,34 @@ ipcMain.handle('check-upscale-binary', () => {
 });
 
 // Upscale a single image — mirrors Upscayl's imageUpscayl command exactly
-ipcMain.handle('upscayl-image', (event, payload) => {
-  const { filePath, outputDir, model, scale, format, tileSize } = payload;
+ipcMain.handle('upscayl-image', async (event, payload) => {
+  const { filePath: rawPath, base64, name, outputDir, model, scale, format, tileSize } = payload;
   const { bin, models } = getUpscaylPaths();
 
   if (!fs.existsSync(bin)) {
     return { error: 'upscayl-bin not found — see README for setup.' };
   }
 
-  const fileName     = path.basename(filePath);
-  const fileNameNoExt = path.parse(fileName).name;
-  const outFile      = path.join(outputDir, `${fileNameNoExt}_upscayl_${scale}x_${model}.${format}`);
+  let filePath = rawPath;
+  let tempFile = null;
+
+  // If the image has no disk path, write its base64 data to a temp file
+  if (!filePath && base64) {
+    const ext  = name ? (path.extname(name) || '.png') : '.png';
+    const stem = name ? path.parse(name).name : 'upscale_input';
+    tempFile = path.join(os.tmpdir(), `foolai_${Date.now()}_${stem}${ext}`);
+    const b64data = base64.includes(',') ? base64.split(',')[1] : base64;
+    fs.writeFileSync(tempFile, Buffer.from(b64data, 'base64'));
+    filePath = tempFile;
+  }
+
+  if (!filePath) {
+    return { error: 'No file path available for this image.' };
+  }
+
+  const fileName      = name || path.basename(filePath);
+  const fileNameNoExt = path.parse(name || path.basename(filePath)).name;
+  const outFile       = path.join(outputDir, `${fileNameNoExt}_upscayl_${scale}x_${model}.${format}`);
 
   // Build CLI args exactly as Upscayl does in get-arguments.ts
   const args = [
@@ -208,23 +261,28 @@ ipcMain.handle('upscayl-image', (event, payload) => {
     const proc = spawn(bin, args, { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
     let failed = false;
 
+    const cleanup = () => { if (tempFile) try { fs.unlinkSync(tempFile); } catch {} };
+
     proc.stderr.on('data', d => {
       const msg = d.toString().trim();
+      if (!msg) return;
       const progress = parseFloat(msg);
       if (!isNaN(progress)) {
         if (mainWin && !mainWin.isDestroyed())
           mainWin.webContents.send('upscayl-progress', { file: fileName, progress });
+      } else {
+        if (mainWin && !mainWin.isDestroyed())
+          mainWin.webContents.send('upscayl-log', msg);
       }
       if (msg.includes('Error') || msg.includes('failed')) {
         failed = true;
         proc.kill();
+        cleanup();
         resolve({ error: msg });
       }
     });
 
-    proc.on('error', err => resolve({ error: err.message }));
-    proc.on('close', code => {
-      if (!failed) resolve({ outFile });
-    });
+    proc.on('error', err => { cleanup(); resolve({ error: err.message }); });
+    proc.on('close', () => { cleanup(); if (!failed) resolve({ outFile }); });
   });
 });

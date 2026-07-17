@@ -5,8 +5,12 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "rebuild": "electron-rebuild -f -w sharp",
     "build:win": "electron-builder --win --x64",
     "build:backend": "pip install pyinstaller iopaint && pyinstaller --onefile --noconsole --name foolai_backend backend/server.py && mkdir -p backend_dist && cp dist/foolai_backend.exe backend_dist/"
+  },
+  "dependencies": {
+    "sharp": "^0.33.5"
   },
   "build": {
     "appId": "com.roninprx.foolai",
@@ -42,6 +46,7 @@
     ]
   },
   "devDependencies": {
+    "@electron/rebuild": "^3.6.0",
     "electron": "^36.3.1",
     "electron-builder": "^26.0.12",
     "playwright": "^1.60.0"
