@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -107,10 +107,40 @@ function createWindow() {
     }
   });
   mainWin.loadFile('index.html');
+
+  // ── Ctrl/Cmd +/- /0 to zoom, handled by hand instead of relying on ──
+  // Electron's invisible default menu (there's no visible menu bar here —
+  // frame: false — and, separately, that default menu's "zoomIn" role binds
+  // to a "Plus" key token that Chromium often fails to match against what a
+  // keyboard actually sends for Ctrl+= (no Shift held), so Ctrl+- (which has
+  // no such ambiguity) works while Ctrl+/Ctrl+= silently does nothing.
+  // Checking input.key directly for both the unshifted and shifted glyphs
+  // (main row '='/'+' and numpad Add/Subtract) sidesteps that entirely.
+  const ZOOM_STEP = 0.5, ZOOM_MIN = -4, ZOOM_MAX = 6;
+  mainWin.webContents.on('before-input-event', (event, input) => {
+    if (input.type !== 'keyDown' || (!input.control && !input.meta)) return;
+    const wc = mainWin.webContents;
+    if (input.key === '=' || input.key === '+') {
+      event.preventDefault();
+      wc.setZoomLevel(Math.min(ZOOM_MAX, wc.getZoomLevel() + ZOOM_STEP));
+    } else if (input.key === '-' || input.key === '_') {
+      event.preventDefault();
+      wc.setZoomLevel(Math.max(ZOOM_MIN, wc.getZoomLevel() - ZOOM_STEP));
+    } else if (input.key === '0') {
+      event.preventDefault();
+      wc.setZoomLevel(0);
+    }
+  });
 }
 
 // ── Boot sequence ──
 app.whenReady().then(async () => {
+  // There's no visible menu bar (frame: false), but Electron still installs
+  // an invisible default one with its own zoom/reload accelerators. Strip it
+  // so the before-input-event zoom handler above is the single source of
+  // truth — otherwise Ctrl+-/Ctrl+0 would double-fire against it.
+  Menu.setApplicationMenu(null);
+
   startBackend();
   createWindow();
 
@@ -187,6 +217,116 @@ ipcMain.handle('optimize-image', async (event, { filePath, outputDir, format, qu
     await pipeline.toFile(outFile);
     const finalSize = fs.statSync(outFile).size;
     return { outFile, originalSize, finalSize };
+  } catch (e) {
+    return { error: e.message };
+  }
+});
+
+// ── Print Plotter (Sharp) ──
+// Resizes one poster to the exact pixel size its physical print dimensions
+// require at the given DPI. Rotation for nesting is a placement-only detail
+// (see cut_list.csv) — the file itself is exported upright.
+ipcMain.handle('plotter-export-poster', async (event, { filePath, name, outputDir, widthCm, heightCm, dpi }) => {
+  try {
+    const sharp = require('sharp');
+    const printDir = path.join(outputDir, 'print_ready');
+    fs.mkdirSync(printDir, { recursive: true });
+    const cmToPx = cm => Math.max(1, Math.round(cm / 2.54 * dpi));
+    const w = cmToPx(widthCm), h = cmToPx(heightCm);
+    const nameNoExt = path.parse(name || filePath).name;
+    const outFile = path.join(printDir, `${nameNoExt}_${widthCm}x${heightCm}cm_${dpi}dpi.png`);
+    // 'cover' scales uniformly (no distortion) and crops any overflow, centered —
+    // never stretches the source image to fit the target print size.
+    await sharp(filePath).resize(w, h, { fit: 'cover', position: 'centre' }).png().toFile(outFile);
+    return { outFile, widthPx: w, heightPx: h };
+  } catch (e) {
+    return { error: e.message };
+  }
+});
+
+// Generic text file writer (used for the plotter's cut_list.csv)
+ipcMain.handle('write-text-file', (_, { filePath, content }) => {
+  fs.writeFileSync(filePath, content, 'utf-8');
+  return true;
+});
+
+// Builds the single hand-to-the-print-shop file: one PDF page sized exactly
+// to the roll width × the length actually used, with every poster embedded
+// at its full source resolution, in its correct nested position and
+// orientation. Page space maps 1:1 onto roll space — no transpose — so a
+// piece the nester did NOT rotate is embedded upright (its own width runs
+// across the page/roll width, its own height runs down the page/roll
+// length — the natural, no-rotation placement), and a piece the nester DID
+// rotate 90° for a tighter fit is embedded rotated 90° to match, exactly as
+// it would need to be physically turned on the roll.
+ipcMain.handle('plotter-export-pdf', async (event, { items, rollWidthCm, usedLengthCm, outputDir, fileName }) => {
+  try {
+    const PDFDocument = require('pdfkit');
+    const sharp = require('sharp');
+    fs.mkdirSync(outputDir, { recursive: true });
+    const cmToPt = cm => (cm / 2.54) * 72;
+    const pageW = cmToPt(rollWidthCm);
+    const pageH = cmToPt(usedLengthCm);
+    const outFile = path.join(outputDir, fileName || 'print_layout.pdf');
+
+    const doc = new PDFDocument({ size: [pageW, pageH], margin: 0, autoFirstPage: true });
+    const stream = fs.createWriteStream(outFile);
+    doc.pipe(stream);
+
+    doc.rect(0, 0, pageW, pageH).fill('#ffffff');
+
+    const errors = [];
+    let placedCount = 0;
+
+    for (const it of items) {
+      const x = cmToPt(it.xCm), y = cmToPt(it.yCm);
+      const w = cmToPt(it.wCm), h = cmToPt(it.hCm);
+      try {
+        // Pre-rotate the actual pixel data with sharp for rotated pieces,
+        // rather than using PDFKit's rotate()+save()/restore(). Measured
+        // directly: repeated rotate()/restore() cycles across several image
+        // placements in one PDFKit document corrupt the orientation of
+        // later images — including ones that were never themselves rotated.
+        // Rotating the source bytes once, up front, sidesteps that bug
+        // entirely and keeps every placement a plain, unrotated embed.
+        //
+        // Always round-trip through sharp (not just for rotated pieces):
+        // PDFKit can only embed raw JPEG/PNG data directly, so a source
+        // file in any other format (WEBP, TIFF, BMP, AVIF, HEIC…) would
+        // otherwise throw here and silently drop that poster. `png()`
+        // guarantees a format PDFKit can always embed. `limitInputPixels:
+        // false` disables sharp's default ~268-megapixel decompression-bomb
+        // guard, which real large-format print sources can legitimately
+        // exceed. `failOn: 'none'` tolerates minor/non-fatal file quirks
+        // instead of aborting on them.
+        let pipeline = sharp(it.filePath, { limitInputPixels: false, failOn: 'none' });
+        if (it.rotated) pipeline = pipeline.rotate(90);
+        const buf = await pipeline.png().toBuffer();
+        const meta = await sharp(buf).metadata();
+        const iw = meta.width, ih = meta.height;
+
+        // Cover-fit by hand: scale to the larger of the two ratios, center, crop via clip.
+        const scale = Math.max(w / iw, h / ih);
+        const dw = iw * scale, dh = ih * scale;
+        const dx = x + (w - dw) / 2, dy = y + (h - dh) / 2;
+
+        doc.save();
+        doc.rect(x, y, w, h).clip(); // never let a scaled-to-cover image bleed past its footprint
+        doc.image(buf, dx, dy, { width: dw, height: dh });
+        doc.restore();
+        placedCount++;
+      } catch (e) {
+        console.error('[Plotter PDF] failed to place', it.filePath, e.message);
+        errors.push({ file: it.filePath, message: e.message });
+      }
+    }
+
+    doc.end();
+    await new Promise((resolve, reject) => {
+      stream.on('finish', resolve);
+      stream.on('error', reject);
+    });
+    return { outFile, placedCount, totalCount: items.length, errors };
   } catch (e) {
     return { error: e.message };
   }

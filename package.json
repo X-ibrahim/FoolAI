@@ -10,6 +10,7 @@
     "build:backend": "pip install pyinstaller iopaint && pyinstaller --onefile --noconsole --name foolai_backend backend/server.py && mkdir -p backend_dist && cp dist/foolai_backend.exe backend_dist/"
   },
   "dependencies": {
+    "pdfkit": "^0.19.1",
     "sharp": "^0.33.5"
   },
   "build": {

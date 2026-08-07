@@ -23,6 +23,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onUpscaylLog:     (cb)      => ipcRenderer.on('upscayl-log', (_, msg) => cb(msg)),
   // Web Optimize
   optimizeImage:    (payload) => ipcRenderer.invoke('optimize-image', payload),
+  // Print Plotter
+  plotterExportPoster: (payload) => ipcRenderer.invoke('plotter-export-poster', payload),
+  plotterExportPdf: (payload) => ipcRenderer.invoke('plotter-export-pdf', payload),
+  writeTextFile:    (opts)    => ipcRenderer.invoke('write-text-file', opts),
   // File path resolution (replaces deprecated file.path)
   getFilePath:      (file)    => webUtils.getPathForFile(file),
+  // Platform info — e.g. flagging Windows-only features (Upscayl) on macOS/Linux
+  platform:         process.platform,
 });

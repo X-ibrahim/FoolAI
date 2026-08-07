@@ -211,6 +211,7 @@ body { animation: fadeUp 0.3s ease both; }
 .mode-card:first-child .tag { border-color: rgba(232,255,71,0.3); color: rgba(232,255,71,0.7); }
 .mode-card.wm .tag { border-color: rgba(71,200,255,0.3); color: rgba(71,200,255,0.7); }
 .mode-card.up .tag { border-color: rgba(255,107,53,0.3); color: rgba(255,107,53,0.7); }
+.tag-platform { border-color: rgba(224,85,85,0.4) !important; color: var(--red) !important; }
 .card-arrow {
   position: absolute; bottom: 22px; right: 22px;
   font-size: 18px; color: var(--text3); transition: all 0.2s;
@@ -402,6 +403,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
   flex: 1; overflow-y: auto; padding: 14px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  grid-auto-rows: max-content;
   gap: 10px; align-content: start;
 }
 .empty-state {
@@ -482,6 +484,18 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
 }
 .img-card:hover .img-card-eye { opacity: 1; }
 .img-card-eye i { font-size: 11px; color: #fff; }
+.img-card-skeleton {
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg, var(--bg2) 30%, var(--bg3) 50%, var(--bg2) 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+.grid-sentinel {
+  grid-column: 1/-1;
+  text-align: center; color: var(--text3);
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  padding: 14px 0; min-height: 1px;
+}
 
 /* ── Bottom bar ── */
 .bottom-bar {
@@ -794,6 +808,125 @@ button.wm-tool-btn:disabled {
   background: var(--green); color: #000; z-index: 2;
   animation: scaleIn 0.2s ease both;
 }
+
+/* ═══════════════════════════════════════
+   PRINT PLOTTER MODE
+═══════════════════════════════════════ */
+:root { --purple: #b47cff; }
+@keyframes pulse-glow-pl {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(180,124,255,0); }
+  50%       { box-shadow: 0 0 0 8px rgba(180,124,255,0.07); }
+}
+.mode-card.pl::before { background: radial-gradient(circle at 50% 0%, rgba(180,124,255,0.08) 0%, transparent 70%); }
+.mode-card.pl:hover   { border-color: var(--purple); }
+.mode-card.pl .card-icon { background: rgba(180,124,255,0.1); }
+.mode-card.pl .tag    { border-color: rgba(180,124,255,0.3); color: rgba(180,124,255,0.7); }
+.mode-card.pl:hover .card-arrow { color: var(--purple); }
+
+.action-btn.primary.pl { background: var(--purple); color: #0f0f0f; }
+.action-btn.primary.pl:not(:disabled) { animation: pulse-glow-pl 2.5s ease-in-out infinite; }
+.progress-fill.pl { background: var(--purple); }
+.progress-fill.active.pl {
+  background: linear-gradient(90deg, rgba(180,124,255,0.4) 0%, var(--purple) 50%, rgba(180,124,255,0.4) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s linear infinite;
+}
+
+/* ── Poster queue rows ── */
+.pl-table { display: flex; flex-direction: column; gap: 6px; }
+.pl-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 54px 58px 14px 58px 42px 24px;
+  align-items: center; gap: 8px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 8px;
+}
+.pl-size-select {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 6px; padding: 5px 3px; color: var(--text2);
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  outline: none; cursor: pointer; appearance: none; text-align: center;
+}
+.pl-size-select:focus { border-color: var(--purple); }
+.pl-size-select option { background: var(--bg3); color: var(--text); }
+.pl-thumb {
+  width: 40px; height: 40px; border-radius: 6px; overflow: hidden;
+  background: var(--bg3); flex-shrink: 0;
+}
+.pl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pl-name {
+  font-size: 11px; color: var(--text2); overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.pl-warn { color: var(--accent2); margin-left: 3px; cursor: help; }
+.pl-num-input {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 6px; padding: 5px 6px; color: var(--text);
+  font-family: 'Space Mono', monospace; font-size: 11px; text-align: center;
+  outline: none;
+}
+.pl-num-input:focus { border-color: var(--purple); }
+.pl-x { color: var(--text3); font-size: 10px; text-align: center; }
+.pl-remove {
+  width: 22px; height: 22px; border-radius: 6px; background: transparent;
+  border: none; color: var(--text3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.pl-remove:hover { background: var(--red); color: #fff; }
+.pl-remove i { font-size: 12px; }
+.pl-head {
+  display: grid; grid-template-columns: 40px 1fr 54px 58px 14px 58px 42px 24px;
+  gap: 8px; padding: 0 8px 6px;
+  font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.08em;
+  color: var(--text3); text-transform: uppercase;
+}
+
+/* ── Layout result view ── */
+.pl-layout-wrap { flex: 1; overflow: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.pl-stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+.pl-stat-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 12px;
+}
+.pl-stat-label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+.pl-stat-value { font-size: 18px; font-weight: 800; margin-top: 3px; }
+.pl-stat-value.warn { color: var(--accent2); }
+.pl-stat-value.good { color: var(--green); }
+
+.pl-canvas-scroll {
+  overflow-x: auto; overflow-y: hidden;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg2); padding: 20px 14px;
+}
+.pl-canvas-scroll canvas { display: block; }
+
+.pl-pockets { display: flex; flex-direction: column; gap: 6px; }
+.pl-pocket-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 12px; font-size: 12px; color: var(--text2);
+  cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.pl-pocket-row:hover { border-color: var(--purple); background: var(--bg3); }
+.pl-pocket-row.filled { border-color: rgba(76,229,150,0.45); }
+.pl-pocket-thumb {
+  width: 36px; height: 36px; border-radius: 6px; overflow: hidden; flex-shrink: 0;
+  background: var(--bg3); display: flex; align-items: center; justify-content: center;
+  color: var(--text3); font-size: 16px;
+}
+.pl-pocket-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pl-pocket-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.pl-pocket-pos { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-pocket-clear {
+  background: none; border: none; color: var(--text3); cursor: pointer;
+  padding: 5px; border-radius: 6px; flex-shrink: 0; display: flex;
+}
+.pl-pocket-clear:hover { color: var(--red); background: rgba(224,85,85,0.12); }
+.pl-pocket-size { font-family: 'Space Mono', monospace; font-weight: 700; color: var(--purple); }
+.pl-empty-hint { font-size: 12px; color: var(--text3); text-align: center; padding: 20px; }
 </style>
 </head>
 <body>
@@ -856,6 +989,7 @@ button.wm-tool-btn:disabled {
             <span class="tag">REAL-ESRGAN</span>
             <span class="tag">BATCH</span>
             <span class="tag">4× QUALITY</span>
+            <span class="tag tag-platform" id="up-platform-tag" style="display:none">WINDOWS ONLY</span>
           </div>
           <div class="card-arrow">↗</div>
         </div>
@@ -868,6 +1002,18 @@ button.wm-tool-btn:disabled {
             <span class="tag">WEBP</span>
             <span class="tag">AVIF</span>
             <span class="tag">BATCH</span>
+          </div>
+          <div class="card-arrow">↗</div>
+        </div>
+
+        <div class="mode-card pl" id="btn-mode-plotter">
+          <div class="card-icon">🖨️</div>
+          <div class="card-title">Print Plotter</div>
+          <div class="card-desc">Nest posters onto a fixed-width roll with the least paper possible — see exactly how much empty space you're paying for.</div>
+          <div class="card-tags">
+            <span class="tag">NESTING</span>
+            <span class="tag">ROLL PRINT</span>
+            <span class="tag">SAVE PAPER</span>
           </div>
           <div class="card-arrow">↗</div>
         </div>
@@ -1290,6 +1436,144 @@ button.wm-tool-btn:disabled {
       </div>
     </div>
 
+    <!-- ═══ PRINT PLOTTER ═══ -->
+    <div class="screen" id="screen-plotter">
+      <div class="tool-layout">
+
+        <div class="sidebar">
+          <div class="sidebar-header">
+            <div class="back-btn" id="back-plotter"><i class="ti ti-arrow-left"></i></div>
+            <div class="sidebar-title">🖨️ Print Plotter</div>
+          </div>
+          <div class="sidebar-body">
+
+            <div class="panel">
+              <div class="panel-title">Add Posters</div>
+              <div class="drop-zone" id="pl-drop">
+                <div class="drop-icon"><i class="ti ti-photo-up"></i></div>
+                <div class="drop-label">Drop poster images or click to browse</div>
+                <div class="drop-sub">JPG · PNG · WEBP</div>
+              </div>
+              <input type="file" id="pl-file-input" multiple accept=".jpg,.jpeg,.png,.webp" style="display:none"/>
+              <input type="file" id="pl-fill-file-input" accept=".jpg,.jpeg,.png,.webp" style="display:none"/>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Roll Width (cm)</div>
+              <div class="opt-tabs" id="pl-roll-tabs">
+                <button class="opt-tab" data-w="60">60</button>
+                <button class="opt-tab" data-w="91">91</button>
+                <button class="opt-tab active" data-w="100">100</button>
+                <button class="opt-tab" data-w="137">137</button>
+                <button class="opt-tab" data-w="152">152</button>
+              </div>
+              <input type="number" id="pl-roll-custom" class="pl-num-input" placeholder="Custom width (cm)" min="1" style="text-align:left;padding:7px 10px;margin-top:8px"/>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Spacing Between Posters</div>
+              <div class="slider-group">
+                <div class="slider-row"><span class="slider-name">Cut gap</span><span class="slider-val" id="val-pl-spacing" style="color:var(--purple)">2 cm</span></div>
+                <input type="range" id="sl-pl-spacing" min="0" max="10" value="2" step="0.5" style="accent-color:var(--purple)"/>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Print Resolution (export)</div>
+              <div class="opt-tabs" id="pl-dpi-tabs">
+                <button class="opt-tab" data-dpi="100">100</button>
+                <button class="opt-tab active" data-dpi="150">150</button>
+                <button class="opt-tab" data-dpi="200">200</button>
+                <button class="opt-tab" data-dpi="300">300</button>
+              </div>
+              <div class="status-hint" style="margin-top:6px;">DPI for exported print-ready files. Lower = fine for far-viewing posters.</div>
+            </div>
+
+            <div class="panel">
+              <div class="opt-toggle-row">
+                <span class="opt-toggle-label">Allow rotating posters 90°</span>
+                <label class="opt-toggle">
+                  <input type="checkbox" id="pl-allow-rotate" checked/>
+                  <div class="opt-toggle-track"></div>
+                  <div class="opt-toggle-thumb"></div>
+                </label>
+              </div>
+              <input type="number" id="pl-price-meter" class="pl-num-input" placeholder="Price per meter (optional)" min="0" step="0.01" style="text-align:left;padding:7px 10px;margin-top:8px"/>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Output</div>
+              <div class="output-row">
+                <div class="output-path" id="pl-out-path">Not selected</div>
+                <div class="icon-btn" id="pl-pick-out" title="Choose folder"><i class="ti ti-folder-open"></i></div>
+              </div>
+              <button class="action-btn primary pl" id="pl-optimize-btn">
+                <i class="ti ti-layout-grid"></i> Optimize Layout
+              </button>
+              <button class="action-btn secondary" id="pl-clear-btn"><i class="ti ti-trash"></i> Clear All</button>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="main-canvas" id="pl-canvas">
+          <div class="canvas-toolbar">
+            <span class="toolbar-label">Print Plotter</span>
+            <div class="view-toggle" style="margin-left:4px">
+              <button class="vt-btn active" id="pl-view-queue-btn" title="Queue"><i class="ti ti-list"></i></button>
+              <button class="vt-btn" id="pl-view-layout-btn" title="Layout"><i class="ti ti-layout-grid"></i></button>
+            </div>
+            <div class="stats-row" style="margin-left:auto">
+              <span class="stat-pill" id="pl-count">0 posters</span>
+              <span class="stat-pill" id="pl-pieces-pill" style="display:none"><strong id="pl-pieces-count">0</strong> pieces</span>
+            </div>
+          </div>
+
+          <!-- QUEUE VIEW -->
+          <div id="pl-queue-view" style="display:block; flex:1; overflow-y:auto; padding:14px;">
+            <div class="pl-head">
+              <span></span><span>Name</span><span>Size</span><span>W cm</span><span></span><span>H cm</span><span>Qty</span><span></span>
+            </div>
+            <div class="pl-table" id="pl-table"></div>
+            <div class="empty-state" id="pl-empty" style="height:220px">
+              <i class="ti ti-photo-off"></i>
+              <p>Drop poster images to get started</p>
+            </div>
+          </div>
+
+          <!-- LAYOUT VIEW -->
+          <div class="pl-layout-wrap" id="pl-layout-view" style="display:none">
+            <div class="pl-empty-hint" id="pl-layout-hint">Click "Optimize Layout" to nest your posters onto the roll.</div>
+            <div id="pl-layout-content" style="display:none">
+              <div class="pl-stats-grid" id="pl-stats-grid"></div>
+              <div class="pl-canvas-scroll"><canvas id="pl-canvas-el"></canvas></div>
+              <div class="pl-empty-hint" style="padding:4px 2px;font-size:11px">📏 Drag on the layout to measure &nbsp;•&nbsp; click a pocket (here or in the list below) to fill it &nbsp;•&nbsp; right-click to clear a measurement or a fill</div>
+              <div class="panel-title" style="margin-top:4px">Empty Pockets — decide what to fill</div>
+              <div class="pl-pockets" id="pl-pockets"></div>
+            </div>
+          </div>
+
+          <div class="bottom-bar">
+            <div class="progress-wrap">
+              <div class="progress-track"><div class="progress-fill pl" id="pl-progress-fill"></div></div>
+              <div class="progress-text">
+                <span id="pl-progress-msg">Ready</span>
+                <span id="pl-progress-count"></span>
+              </div>
+            </div>
+            <button class="open-btn" id="pl-export-btn" disabled>
+              <i class="ti ti-download"></i> Export
+            </button>
+            <button class="open-btn" id="pl-open-btn" disabled>
+              <i class="ti ti-folder"></i> Open folder
+            </button>
+          </div>
+          <div class="log-panel" id="pl-log"></div>
+        </div>
+
+      </div>
+    </div>
+
   </div><!-- app-body -->
 </div><!-- app -->
 
@@ -1348,9 +1632,17 @@ function showScreen(id) {
     'screen-watermark': 'REMOVE WATERMARK',
     'screen-upscale':   'AI UPSCALE',
     'screen-optimize':  'WEB OPTIMIZE',
+    'screen-plotter':   'PRINT PLOTTER',
   };
   document.getElementById('titlebar-mode').textContent = modeMap[id] || '';
 }
+
+// Upscayl bundles a Windows-only binary (resources/upscayl/bin/) — flag it on
+// the home screen up front rather than letting the user discover it's dead
+// only after clicking in. checkUpscaylBinary() (below) still handles the
+// underlying "is the binary actually there" check for the in-screen status.
+const IS_WINDOWS = window.electronAPI?.platform === 'win32';
+if (!IS_WINDOWS) document.getElementById('up-platform-tag').style.display = '';
 
 document.getElementById('btn-mode-humanize').addEventListener('click', () => showScreen('screen-humanize'));
 document.getElementById('btn-mode-watermark').addEventListener('click', () => showScreen('screen-watermark'));
@@ -1359,10 +1651,12 @@ document.getElementById('btn-mode-upscale').addEventListener('click', () => {
   checkUpscaylBinary();
 });
 document.getElementById('btn-mode-optimize').addEventListener('click', () => showScreen('screen-optimize'));
+document.getElementById('btn-mode-plotter').addEventListener('click', () => showScreen('screen-plotter'));
 document.getElementById('back-humanize').addEventListener('click', () => showScreen('screen-home'));
 document.getElementById('back-watermark').addEventListener('click', () => showScreen('screen-home'));
 document.getElementById('back-upscale').addEventListener('click', () => showScreen('screen-home'));
 document.getElementById('back-optimize').addEventListener('click', () => showScreen('screen-home'));
+document.getElementById('back-plotter').addEventListener('click', () => showScreen('screen-home'));
 
 // ═══════════════════════════════════════════════
 // PREVIEW MODAL
@@ -1500,6 +1794,126 @@ async function getFilesFromDataTransfer(dataTransfer) {
   return Array.from(dataTransfer.files || []);
 }
 
+// ── Shared helpers: cheap thumbnails + lazy full-res loads for large batches ──
+// Large drops (dozens-hundreds of images) used to read every file as a full-resolution
+// base64 string just to show a 148px thumbnail. That's what made the queue overlap,
+// stutter, and slow down the actual Process step. Now we only ever keep a small
+// downscaled thumbnail in memory per queued image, and fetch the full-resolution
+// source lazily (compare preview, or as a processing fallback) one at a time.
+const GRID_PAGE_SIZE = 60;
+
+function mimeFromName(name) {
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  return { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', avif: 'image/avif', gif: 'image/gif' }[ext] || 'image/jpeg';
+}
+
+// Decodes straight from the Blob and immediately downscales + discards the full bitmap,
+// so a 100-image drop never holds 100 full-resolution decoded images in memory at once.
+async function makeThumbnail(file, maxDim = 240, quality = 0.72) {
+  let bitmap = null;
+  try {
+    bitmap = await createImageBitmap(file);
+    let { width, height } = bitmap;
+    if (width > maxDim || height > maxDim) {
+      const scale = maxDim / Math.max(width, height);
+      width  = Math.max(1, Math.round(width * scale));
+      height = Math.max(1, Math.round(height * scale));
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
+    return canvas.toDataURL('image/jpeg', quality);
+  } catch (e) {
+    // Fallback for formats createImageBitmap can't decode in this environment
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            const scale = maxDim / Math.max(width, height);
+            width  = Math.max(1, Math.round(width * scale));
+            height = Math.max(1, Math.round(height * scale));
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = ev.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  } finally {
+    bitmap?.close?.();
+  }
+}
+
+// Runs `worker` over `items` with at most `limit` in flight — keeps a 100-image
+// drop from spawning 100 concurrent decodes and choking the UI thread.
+async function mapWithConcurrency(items, limit, worker) {
+  let next = 0;
+  const lanes = new Array(Math.min(limit, items.length)).fill(0).map(async () => {
+    while (next < items.length) {
+      const i = next++;
+      await worker(items[i], i);
+    }
+  });
+  await Promise.all(lanes);
+}
+
+// Lazily fetches (and caches) the full-resolution source for a queue entry — only
+// needed for the compare-preview or as a processing fallback, one image at a time.
+async function getOriginalDataUrl(img) {
+  if (img.originalDataUrl) return img.originalDataUrl;
+  if (img.filePath && window.electronAPI?.readFileBase64) {
+    const b64 = await window.electronAPI.readFileBase64(img.filePath);
+    img.originalDataUrl = `data:${mimeFromName(img.name)};base64,${b64}`;
+  } else if (img.file) {
+    img.originalDataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(img.file);
+    });
+  }
+  return img.originalDataUrl;
+}
+
+// Infinite-scroll controller for a queue grid: renders GRID_PAGE_SIZE cards at a
+// time and loads more automatically as the user scrolls near the bottom — or, if the
+// first page doesn't even fill the visible area, tops itself up so there's no dead
+// space to scroll in the first place.
+function createGridPager(gridEl) {
+  const state = { visible: GRID_PAGE_SIZE, total: 0, onMore: null };
+  const sentinel = document.createElement('div');
+  sentinel.className = 'grid-sentinel';
+  state.sentinel = sentinel;
+  state.reset = () => { state.visible = GRID_PAGE_SIZE; };
+  state.checkFill = () => {
+    if (state.visible >= state.total) return;
+    const nearBottom     = gridEl.scrollTop + gridEl.clientHeight >= gridEl.scrollHeight - 200;
+    const notOverflowing = gridEl.scrollHeight <= gridEl.clientHeight + 4;
+    if (nearBottom || notOverflowing) state.onMore?.();
+  };
+  gridEl.addEventListener('scroll', state.checkFill);
+  return state;
+}
+
+// Debounces re-renders to one per animation frame, however many thumbnails finish
+// in that frame — avoids rebuilding the whole grid once per image (O(n^2) on a big drop).
+function createRenderScheduler(renderFn) {
+  let queued = false;
+  return () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; renderFn(); });
+  };
+}
+
 // Drop zone
 const hzDrop   = document.getElementById('hz-drop');
 const hzInput  = document.getElementById('hz-file-input');
@@ -1550,17 +1964,30 @@ function uniqueHzName(base) {
   return candidate;
 }
 
-function addHzFiles(files) {
-  for (const f of files) {
-    if (!isImageFile(f)) continue;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const name = uniqueHzName(f.name);
-      hzImages.push({ file: f, name, dataUrl: ev.target.result, originalDataUrl: ev.target.result, processedDataUrl: null, status: 'pending' });
-      renderHzGrid();
-    };
-    reader.readAsDataURL(f);
+const hzPager = createGridPager(document.getElementById('hz-grid'));
+hzPager.onMore = () => {
+  if (hzPager.visible < hzImages.length) {
+    hzPager.visible = Math.min(hzImages.length, hzPager.visible + GRID_PAGE_SIZE);
+    renderHzGrid();
   }
+};
+const scheduleHzRender = createRenderScheduler(renderHzGrid);
+
+async function addHzFiles(files) {
+  const imgFiles = Array.from(files).filter(isImageFile);
+  if (!imgFiles.length) return;
+  const entries = [];
+  for (const f of imgFiles) {
+    const entry = { file: f, name: uniqueHzName(f.name), dataUrl: null, originalDataUrl: null, processedDataUrl: null, status: 'pending' };
+    hzImages.push(entry);
+    entries.push(entry);
+  }
+  renderHzGrid();
+  await mapWithConcurrency(entries, 4, async entry => {
+    try { entry.dataUrl = await makeThumbnail(entry.file); } catch (e) { /* leave as skeleton */ }
+    scheduleHzRender();
+  });
+  renderHzGrid();
 }
 
 function renderHzGrid() {
@@ -1571,15 +1998,15 @@ function renderHzGrid() {
   const donePill = document.getElementById('hz-done-pill');
   donePill.style.display = done > 0 ? '' : 'none';
   document.getElementById('hz-done-count').textContent = done;
-  if (!hzImages.length) { empty.style.display = 'flex'; return; }
-  empty.style.display = 'none';
   grid.querySelectorAll('.img-card').forEach(c => c.remove());
-  hzImages.forEach((img, i) => {
+  if (!hzImages.length) { empty.style.display = 'flex'; hzPager.sentinel.remove(); return; }
+  empty.style.display = 'none';
+  hzImages.slice(0, hzPager.visible).forEach((img, i) => {
     const card = document.createElement('div');
     card.className = 'img-card';
     const isDone = img.status === 'done';
     card.innerHTML = `
-      <img src="${img.dataUrl}" alt="${img.name}"/>
+      ${img.dataUrl ? `<img src="${img.dataUrl}" alt="${img.name}" loading="lazy" decoding="async"/>` : '<div class="img-card-skeleton"></div>'}
       ${img.status === 'done'       ? '<div class="img-card-status status-done">DONE</div>' : ''}
       ${img.status === 'processing' ? '<div class="img-card-status status-proc">...</div>'  : ''}
       ${img.status === 'error'      ? '<div class="img-card-status status-err">ERR</div>'   : ''}
@@ -1588,7 +2015,10 @@ function renderHzGrid() {
       ${isDone ? '<div class="img-card-eye"><i class="ti ti-eye"></i></div>' : ''}
     `;
     if (isDone) {
-      card.addEventListener('click', () => openPreview(img.originalDataUrl, img.processedDataUrl, img.name));
+      card.addEventListener('click', async () => {
+        const orig = await getOriginalDataUrl(img);
+        openPreview(orig, img.processedDataUrl, img.name);
+      });
     }
     card.querySelector('.img-card-remove').addEventListener('click', e => {
       e.stopPropagation();
@@ -1597,6 +2027,11 @@ function renderHzGrid() {
     });
     grid.appendChild(card);
   });
+  hzPager.sentinel.textContent = hzPager.visible < hzImages.length
+    ? `Loading more… (${hzImages.length - hzPager.visible} left)` : '';
+  grid.appendChild(hzPager.sentinel);
+  hzPager.total = hzImages.length;
+  hzPager.checkFill();
 }
 
 // Output folder
@@ -1642,7 +2077,8 @@ document.getElementById('hz-process-btn').addEventListener('click', async () => 
     fillEl.style.width = `${Math.round((i / hzImages.length) * 100)}%`;
 
     try {
-      const processed = await processImageCanvas(img.originalDataUrl, opts);
+      const original  = await getOriginalDataUrl(img);
+      const processed = await processImageCanvas(original, opts);
       if (window.electronAPI && hzOutFolder) {
         const b64     = processed.split(',')[1];
         const outName = img.name.replace(/\.[^.]+$/, '') + '_foolai.jpg';
@@ -1673,6 +2109,7 @@ document.getElementById('hz-process-btn').addEventListener('click', async () => 
 // Clear
 document.getElementById('hz-clear-btn').addEventListener('click', () => {
   hzImages.length = 0;
+  hzPager.reset();
   renderHzGrid();
   document.getElementById('hz-progress-fill').style.width = '0%';
   document.getElementById('hz-progress-msg').textContent  = 'Ready';
@@ -2141,17 +2578,29 @@ upDrop.addEventListener('dragleave', () => upDrop.classList.remove('drag-over'))
 upDrop.addEventListener('drop', e => { e.preventDefault(); upDrop.classList.remove('drag-over'); addUpFiles(e.dataTransfer.files); });
 upInput.addEventListener('change', e => addUpFiles(e.target.files));
 
-function addUpFiles(files) {
-  for (const f of files) {
-    if (!f.type.startsWith('image/')) continue;
-    const filePath = window.electronAPI?.getFilePath ? window.electronAPI.getFilePath(f) : (f.path || null);
-    const reader = new FileReader();
-    reader.onload = ev => {
-      upImages.push({ filePath: filePath || null, name: f.name, dataUrl: ev.target.result, originalDataUrl: ev.target.result, processedDataUrl: null, status: 'pending' });
-      renderUpGrid();
-    };
-    reader.readAsDataURL(f);
+const upPager = createGridPager(document.getElementById('up-grid'));
+upPager.onMore = () => {
+  if (upPager.visible < upImages.length) {
+    upPager.visible = Math.min(upImages.length, upPager.visible + GRID_PAGE_SIZE);
+    renderUpGrid();
   }
+};
+const scheduleUpRender = createRenderScheduler(renderUpGrid);
+
+async function addUpFiles(files) {
+  const imgFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (!imgFiles.length) return;
+  const entries = imgFiles.map(f => ({
+    filePath: window.electronAPI?.getFilePath ? window.electronAPI.getFilePath(f) : (f.path || null),
+    name: f.name, file: f, dataUrl: null, originalDataUrl: null, processedDataUrl: null, status: 'pending',
+  }));
+  upImages.push(...entries);
+  renderUpGrid();
+  await mapWithConcurrency(entries, 4, async entry => {
+    try { entry.dataUrl = await makeThumbnail(entry.file); } catch (e) { /* leave as skeleton */ }
+    scheduleUpRender();
+  });
+  renderUpGrid();
 }
 
 function renderUpGrid() {
@@ -2162,15 +2611,15 @@ function renderUpGrid() {
   const donePill = document.getElementById('up-done-pill');
   donePill.style.display = done > 0 ? '' : 'none';
   document.getElementById('up-done-count').textContent = done;
-  if (!upImages.length) { empty.style.display = 'flex'; return; }
-  empty.style.display = 'none';
   grid.querySelectorAll('.img-card').forEach(c => c.remove());
-  upImages.forEach((img, i) => {
+  if (!upImages.length) { empty.style.display = 'flex'; upPager.sentinel.remove(); return; }
+  empty.style.display = 'none';
+  upImages.slice(0, upPager.visible).forEach((img, i) => {
     const card = document.createElement('div');
     card.className = 'img-card';
     const isDone = img.status === 'done';
     card.innerHTML = `
-      <img src="${img.dataUrl}" alt="${img.name}"/>
+      ${img.dataUrl ? `<img src="${img.dataUrl}" alt="${img.name}" loading="lazy" decoding="async"/>` : '<div class="img-card-skeleton"></div>'}
       ${img.status === 'done'       ? '<div class="img-card-status status-done">DONE</div>' : ''}
       ${img.status === 'processing' ? '<div class="img-card-status status-proc">...</div>'  : ''}
       ${img.status === 'error'      ? '<div class="img-card-status status-err">ERR</div>'   : ''}
@@ -2179,7 +2628,10 @@ function renderUpGrid() {
       ${isDone ? '<div class="img-card-eye"><i class="ti ti-eye"></i></div>' : ''}
     `;
     if (isDone) {
-      card.addEventListener('click', () => openPreview(img.originalDataUrl, img.processedDataUrl, img.name));
+      card.addEventListener('click', async () => {
+        const orig = await getOriginalDataUrl(img);
+        openPreview(orig, img.processedDataUrl, img.name);
+      });
     }
     card.querySelector('.img-card-remove').addEventListener('click', e => {
       e.stopPropagation();
@@ -2188,6 +2640,11 @@ function renderUpGrid() {
     });
     grid.appendChild(card);
   });
+  upPager.sentinel.textContent = upPager.visible < upImages.length
+    ? `Loading more… (${upImages.length - upPager.visible} left)` : '';
+  grid.appendChild(upPager.sentinel);
+  upPager.total = upImages.length;
+  upPager.checkFill();
 }
 
 document.getElementById('up-pick-out').addEventListener('click', async () => {
@@ -2216,8 +2673,14 @@ async function checkUpscaylBinary() {
     hint.textContent  = 'Models loaded from resources/upscayl/models/';
   } else {
     dot.style.background = 'var(--red)'; label.style.color = 'var(--red)';
-    label.textContent = !binExists ? 'upscayl-bin.exe not found' : 'Models missing';
-    hint.textContent  = 'See resources/upscayl/SETUP.md for instructions.';
+    if (!IS_WINDOWS && !binExists) {
+      // Not a broken install — Upscayl just doesn't ship a macOS/Linux binary here yet.
+      label.textContent = 'Upscayl is Windows-only for now';
+      hint.textContent  = 'No upscayl-bin build is bundled for this platform yet.';
+    } else {
+      label.textContent = !binExists ? 'upscayl-bin not found' : 'Models missing';
+      hint.textContent  = 'See resources/upscayl/SETUP.md for instructions.';
+    }
   }
   return ready;
 }
@@ -2270,7 +2733,8 @@ document.getElementById('up-process-btn').addEventListener('click', async () => 
     upLog(`[${i+1}/${upImages.length}] Upscaling ${img.name}...`, 'info');
 
     try {
-      const result = await window.electronAPI.upscaylImage({ filePath: img.filePath, base64: img.filePath ? undefined : img.dataUrl, name: img.name, outputDir: upOutFolder, model: upModel, scale: upScale, format: upFormat, tileSize: 0 });
+      const base64 = img.filePath ? undefined : await getOriginalDataUrl(img);
+      const result = await window.electronAPI.upscaylImage({ filePath: img.filePath, base64, name: img.name, outputDir: upOutFolder, model: upModel, scale: upScale, format: upFormat, tileSize: 0 });
       if (result.error) throw new Error(result.error);
       img.status = 'done';
       // Load the upscaled image back for preview
@@ -2298,6 +2762,7 @@ document.getElementById('up-process-btn').addEventListener('click', async () => 
 
 document.getElementById('up-clear-btn').addEventListener('click', () => {
   upImages.length = 0;
+  upPager.reset();
   renderUpGrid();
   document.getElementById('up-progress-fill').style.width  = '0%';
   document.getElementById('up-progress-msg').textContent   = 'Ready';
@@ -2371,17 +2836,30 @@ optDrop.addEventListener('dragleave', () => optDrop.classList.remove('drag-over'
 optDrop.addEventListener('drop', e => { e.preventDefault(); optDrop.classList.remove('drag-over'); addOptFiles(e.dataTransfer.files); });
 optInput.addEventListener('change', e => addOptFiles(e.target.files));
 
-function addOptFiles(files) {
-  for (const f of files) {
-    if (!f.type.startsWith('image/')) continue;
-    const filePath = window.electronAPI?.getFilePath ? window.electronAPI.getFilePath(f) : (f.path || null);
-    const reader = new FileReader();
-    reader.onload = ev => {
-      optImages.push({ filePath: filePath || null, name: f.name, dataUrl: ev.target.result, originalDataUrl: ev.target.result, processedDataUrl: null, status: 'pending', originalSize: f.size, finalSize: null });
-      renderOptGrid();
-    };
-    reader.readAsDataURL(f);
+const optPager = createGridPager(document.getElementById('opt-grid'));
+optPager.onMore = () => {
+  if (optPager.visible < optImages.length) {
+    optPager.visible = Math.min(optImages.length, optPager.visible + GRID_PAGE_SIZE);
+    renderOptGrid();
   }
+};
+const scheduleOptRender = createRenderScheduler(renderOptGrid);
+
+async function addOptFiles(files) {
+  const imgFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (!imgFiles.length) return;
+  const entries = imgFiles.map(f => ({
+    filePath: window.electronAPI?.getFilePath ? window.electronAPI.getFilePath(f) : (f.path || null),
+    name: f.name, file: f, dataUrl: null, originalDataUrl: null, processedDataUrl: null,
+    status: 'pending', originalSize: f.size, finalSize: null,
+  }));
+  optImages.push(...entries);
+  renderOptGrid();
+  await mapWithConcurrency(entries, 4, async entry => {
+    try { entry.dataUrl = await makeThumbnail(entry.file); } catch (e) { /* leave as skeleton */ }
+    scheduleOptRender();
+  });
+  renderOptGrid();
 }
 
 function formatBytes(b) {
@@ -2404,16 +2882,16 @@ function renderOptGrid() {
   } else {
     savingsPill.style.display = 'none';
   }
-  if (!optImages.length) { empty.style.display = 'flex'; return; }
-  empty.style.display = 'none';
   grid.querySelectorAll('.img-card').forEach(c => c.remove());
-  optImages.forEach((img, i) => {
+  if (!optImages.length) { empty.style.display = 'flex'; optPager.sentinel.remove(); return; }
+  empty.style.display = 'none';
+  optImages.slice(0, optPager.visible).forEach((img, i) => {
     const card = document.createElement('div');
     card.className = 'img-card';
     const isDone = img.status === 'done';
     const savings = isDone && img.finalSize ? Math.round((1 - img.finalSize / img.originalSize) * 100) : null;
     card.innerHTML = `
-      <img src="${img.dataUrl}" alt="${img.name}"/>
+      ${img.dataUrl ? `<img src="${img.dataUrl}" alt="${img.name}" loading="lazy" decoding="async"/>` : '<div class="img-card-skeleton"></div>'}
       ${isDone               ? '<div class="img-card-status status-done">DONE</div>' : ''}
       ${img.status === 'processing' ? '<div class="img-card-status status-proc">...</div>'  : ''}
       ${img.status === 'error'      ? '<div class="img-card-status status-err">ERR</div>'   : ''}
@@ -2423,7 +2901,10 @@ function renderOptGrid() {
       ${isDone ? '<div class="img-card-eye"><i class="ti ti-eye"></i></div>' : ''}
     `;
     if (isDone && img.processedDataUrl) {
-      card.addEventListener('click', () => openPreview(img.originalDataUrl, img.processedDataUrl, img.name));
+      card.addEventListener('click', async () => {
+        const orig = await getOriginalDataUrl(img);
+        openPreview(orig, img.processedDataUrl, img.name);
+      });
     }
     card.querySelector('.img-card-remove').addEventListener('click', e => {
       e.stopPropagation();
@@ -2432,6 +2913,11 @@ function renderOptGrid() {
     });
     grid.appendChild(card);
   });
+  optPager.sentinel.textContent = optPager.visible < optImages.length
+    ? `Loading more… (${optImages.length - optPager.visible} left)` : '';
+  grid.appendChild(optPager.sentinel);
+  optPager.total = optImages.length;
+  optPager.checkFill();
 }
 
 document.getElementById('opt-pick-out').addEventListener('click', async () => {
@@ -2523,6 +3009,7 @@ document.getElementById('opt-process-btn').addEventListener('click', async () =>
 
 document.getElementById('opt-clear-btn').addEventListener('click', () => {
   optImages.length = 0;
+  optPager.reset();
   renderOptGrid();
   document.getElementById('opt-progress-fill').style.width  = '0%';
   document.getElementById('opt-progress-msg').textContent   = 'Ready';
@@ -2538,6 +3025,973 @@ function optLog(msg, type = '') {
   panel.appendChild(el);
   panel.scrollTop = panel.scrollHeight;
 }
+
+// ═══════════════════════════════════════════════
+// PRINT PLOTTER — NESTING ENGINE (MaxRects, Best Short Side Fit)
+// ═══════════════════════════════════════════════
+// Packs rectangles into a strip of fixed width and unbounded length, trying
+// to minimize the length actually used (that's what gets billed per meter).
+// x/w always run across the roll (bounded by rollWidth); y/h always run
+// along the roll (the unbounded "length" direction).
+const PL_INF = 1000000; // cm — effectively unbounded length sentinel
+
+class MaxRectsPacker {
+  constructor(width) {
+    this.width = width;
+    this.freeRects = [{ x: 0, y: 0, w: width, h: PL_INF }];
+  }
+
+  findPosition(w, h, allowRotate) {
+    let best = null;
+    const consider = (rw, rh, rotated) => {
+      for (const fr of this.freeRects) {
+        if (rw <= fr.w + 1e-9 && rh <= fr.h + 1e-9) {
+          const leftoverW = fr.w - rw;
+          const leftoverH = fr.h - rh;
+          const shortSide = Math.min(leftoverW, leftoverH);
+          const longSide  = Math.max(leftoverW, leftoverH);
+          if (!best || shortSide < best.shortSide - 1e-9 ||
+              (Math.abs(shortSide - best.shortSide) < 1e-9 && longSide < best.longSide)) {
+            best = { x: fr.x, y: fr.y, w: rw, h: rh, rotated, shortSide, longSide };
+          }
+        }
+      }
+    };
+    consider(w, h, false);
+    if (allowRotate && w !== h) consider(h, w, true);
+    return best;
+  }
+
+  intersects(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  containedIn(a, b) {
+    return a.x >= b.x - 1e-6 && a.y >= b.y - 1e-6 &&
+           a.x + a.w <= b.x + b.w + 1e-6 && a.y + a.h <= b.y + b.h + 1e-6;
+  }
+
+  place(w, h, allowRotate) {
+    const pos = this.findPosition(w, h, allowRotate);
+    if (!pos) return null;
+    const placedRect = { x: pos.x, y: pos.y, w: pos.w, h: pos.h };
+
+    const newFree = [];
+    for (const fr of this.freeRects) {
+      if (!this.intersects(fr, placedRect)) { newFree.push(fr); continue; }
+      if (placedRect.x > fr.x) newFree.push({ x: fr.x, y: fr.y, w: placedRect.x - fr.x, h: fr.h });
+      if (placedRect.x + placedRect.w < fr.x + fr.w) newFree.push({ x: placedRect.x + placedRect.w, y: fr.y, w: fr.x + fr.w - (placedRect.x + placedRect.w), h: fr.h });
+      if (placedRect.y > fr.y) newFree.push({ x: fr.x, y: fr.y, w: fr.w, h: placedRect.y - fr.y });
+      if (placedRect.y + placedRect.h < fr.y + fr.h) newFree.push({ x: fr.x, y: placedRect.y + placedRect.h, w: fr.w, h: fr.y + fr.h - (placedRect.y + placedRect.h) });
+    }
+
+    const filtered = newFree.filter(r => r.w > 1e-6 && r.h > 1e-6);
+    const pruned = [];
+    for (let i = 0; i < filtered.length; i++) {
+      let contained = false;
+      for (let j = 0; j < filtered.length; j++) {
+        if (i === j) continue;
+        if (this.containedIn(filtered[i], filtered[j])) { contained = true; break; }
+      }
+      if (!contained) pruned.push(filtered[i]);
+    }
+    this.freeRects = pruned;
+
+    return { x: pos.x, y: pos.y, w: pos.w, h: pos.h, rotated: pos.rotated };
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PRINT PLOTTER FEATURE
+// ═══════════════════════════════════════════════
+const plImages = []; // { file, name, filePath, dataUrl, nativeW, nativeH, widthCm, heightCm, qty, sizePreset }
+const plPreviewBitmapCache = new Map();
+const plFillBitmapCache = new Map(); // pocket index -> ImageBitmap promise, for pockets filled via the tool below
+let plActiveFillPocketIdx = null;    // which pocket the (hidden) fill file-input is currently targeting
+let plRollWidth   = 100;
+let plSpacing     = 2;
+let plDpi         = 150;
+let plAllowRotate = true;
+let plPriceMeter  = null;
+let plOutFolder   = null;
+let plLayout      = null;
+
+function plLog(msg, type = '') {
+  const panel = document.getElementById('pl-log');
+  const el = document.createElement('div');
+  el.className = 'log-entry ' + type;
+  el.textContent = '> ' + msg;
+  panel.appendChild(el);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+// ISO 216 "A" series poster sizes, in cm, portrait orientation (width × height).
+const PL_A_SERIES_CM = {
+  A0: [84.1, 118.9],
+  A1: [59.4, 84.1],
+  A2: [42.0, 59.4],
+  A3: [29.7, 42.0],
+  A4: [21.0, 29.7],
+  A5: [14.8, 21.0],
+  A6: [10.5, 14.8],
+  A7: [7.4, 10.5],
+};
+
+// Reads just the native pixel size of an image file (independent of the thumbnail).
+async function getNativeSize(file) {
+  let bitmap = null;
+  try {
+    bitmap = await createImageBitmap(file);
+    return { w: bitmap.width, h: bitmap.height };
+  } catch (e) {
+    return await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload  = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+        img.onerror = () => resolve({ w: 0, h: 0 });
+        img.src = ev.target.result;
+      };
+      reader.onerror = () => resolve({ w: 0, h: 0 });
+      reader.readAsDataURL(file);
+    });
+  } finally {
+    bitmap?.close?.();
+  }
+}
+
+// ── Roll width tabs + custom ──
+document.querySelectorAll('#pl-roll-tabs .opt-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#pl-roll-tabs .opt-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    plRollWidth = +btn.dataset.w;
+    document.getElementById('pl-roll-custom').value = '';
+  });
+});
+document.getElementById('pl-roll-custom').addEventListener('input', e => {
+  const v = +e.target.value;
+  if (v > 0) {
+    plRollWidth = v;
+    document.querySelectorAll('#pl-roll-tabs .opt-tab').forEach(b => b.classList.remove('active'));
+  }
+});
+
+// ── Spacing ──
+document.getElementById('sl-pl-spacing').addEventListener('input', e => {
+  plSpacing = +e.target.value;
+  document.getElementById('val-pl-spacing').textContent = plSpacing + ' cm';
+});
+
+// ── DPI tabs ──
+document.querySelectorAll('#pl-dpi-tabs .opt-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#pl-dpi-tabs .opt-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    plDpi = +btn.dataset.dpi;
+  });
+});
+
+// ── Rotate toggle + price ──
+document.getElementById('pl-allow-rotate').addEventListener('change', e => { plAllowRotate = e.target.checked; });
+document.getElementById('pl-price-meter').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  plPriceMeter = (e.target.value && !isNaN(v) && v > 0) ? v : null;
+});
+
+// ── Drop zone ──
+const plDrop  = document.getElementById('pl-drop');
+const plInput = document.getElementById('pl-file-input');
+plDrop.addEventListener('click', () => plInput.click());
+plDrop.addEventListener('dragover',  e => { e.preventDefault(); plDrop.classList.add('drag-over'); });
+plDrop.addEventListener('dragleave', () => plDrop.classList.remove('drag-over'));
+plDrop.addEventListener('drop', e => { e.preventDefault(); plDrop.classList.remove('drag-over'); addPlFiles(e.dataTransfer.files); });
+plInput.addEventListener('change', e => addPlFiles(e.target.files));
+
+async function addPlFiles(files) {
+  const imgFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (!imgFiles.length) return;
+  const entries = imgFiles.map(f => ({
+    filePath: window.electronAPI?.getFilePath ? window.electronAPI.getFilePath(f) : (f.path || null),
+    name: f.name, file: f, dataUrl: null,
+    nativeW: 0, nativeH: 0,
+    widthCm: null, heightCm: null, qty: 1,
+    sizePreset: null, // e.g. 'A3' once picked from the dropdown — null means "Custom"
+  }));
+  plImages.push(...entries);
+  renderPlTable();
+  await mapWithConcurrency(entries, 4, async entry => {
+    try {
+      const [dataUrl, size] = await Promise.all([makeThumbnail(entry.file), getNativeSize(entry.file)]);
+      entry.dataUrl = dataUrl;
+      entry.nativeW = size.w; entry.nativeH = size.h;
+      if (size.w && size.h) {
+        entry.widthCm  = +(size.w / plDpi * 2.54).toFixed(1);
+        entry.heightCm = +(size.h / plDpi * 2.54).toFixed(1);
+      } else {
+        entry.widthCm = 30; entry.heightCm = 40;
+      }
+    } catch (e) { /* leave blank, user can fill in manually */ }
+    renderPlTable();
+  });
+}
+
+// Clears an entry's stored size preset once its W/H no longer matches that
+// preset's dimensions — called after any manual width/height edit.
+function plSyncPlSizePreset(i) {
+  const p = plImages[i];
+  if (!p.sizePreset) return;
+  const preset = PL_A_SERIES_CM[p.sizePreset];
+  const TOL_CM = 0.05;
+  if (!preset || Math.abs(p.widthCm - preset[0]) > TOL_CM || Math.abs(p.heightCm - preset[1]) > TOL_CM) {
+    p.sizePreset = null;
+  }
+}
+
+function renderPlTable() {
+  const table = document.getElementById('pl-table');
+  const empty = document.getElementById('pl-empty');
+  document.getElementById('pl-count').textContent = plImages.length + ' poster' + (plImages.length !== 1 ? 's' : '');
+  const totalPieces = plImages.reduce((s, p) => s + (p.qty || 0), 0);
+  const piecesPill = document.getElementById('pl-pieces-pill');
+  if (totalPieces > plImages.length) {
+    piecesPill.style.display = '';
+    document.getElementById('pl-pieces-count').textContent = totalPieces;
+  } else {
+    piecesPill.style.display = 'none';
+  }
+
+  table.innerHTML = '';
+  if (!plImages.length) { empty.style.display = 'flex'; return; }
+  empty.style.display = 'none';
+
+  plImages.forEach((p, i) => {
+    const nativeAspect = p.nativeW && p.nativeH ? p.nativeW / p.nativeH : null;
+    const targetAspect = p.widthCm && p.heightCm ? p.widthCm / p.heightCm : null;
+    const mismatch = nativeAspect && targetAspect && Math.abs(nativeAspect - targetAspect) / nativeAspect > 0.08;
+    const row = document.createElement('div');
+    row.className = 'pl-row';
+    row.innerHTML = `
+      <div class="pl-thumb">${p.dataUrl ? `<img src="${p.dataUrl}" alt="" loading="lazy"/>` : ''}</div>
+      <div class="pl-name" title="${p.name}">${p.name}<span class="pl-warn" id="pl-warn-${i}" style="display:${mismatch ? 'inline' : 'none'}" title="Print size doesn't match the image's own aspect ratio — it'll be cropped to fit, not stretched">⚠</span></div>
+      <select class="pl-size-select" data-i="${i}" title="Standard size — auto-fills W × H">
+        <option value="">Custom</option>
+        <option value="A0">A0</option>
+        <option value="A1">A1</option>
+        <option value="A2">A2</option>
+        <option value="A3">A3</option>
+        <option value="A4">A4</option>
+        <option value="A5">A5</option>
+        <option value="A6">A6</option>
+        <option value="A7">A7</option>
+      </select>
+      <input type="number" class="pl-num-input" data-i="${i}" data-f="widthCm" value="${p.widthCm ?? ''}" min="0.1" step="0.1"/>
+      <span class="pl-x">×</span>
+      <input type="number" class="pl-num-input" data-i="${i}" data-f="heightCm" value="${p.heightCm ?? ''}" min="0.1" step="0.1"/>
+      <input type="number" class="pl-num-input" data-i="${i}" data-f="qty" value="${p.qty}" min="1" step="1"/>
+      <button class="pl-remove" data-i="${i}" title="Remove"><i class="ti ti-x"></i></button>
+    `;
+    row.querySelector('.pl-size-select').value = p.sizePreset || ''; // restore the chosen preset — the table gets rebuilt on every add
+    table.appendChild(row);
+  });
+
+  table.querySelectorAll('.pl-size-select').forEach(sel => {
+    sel.addEventListener('change', e => {
+      const i = +e.target.dataset.i;
+      const value = e.target.value;
+      plImages[i].sizePreset = value || null;
+      const preset = PL_A_SERIES_CM[value];
+      if (!preset) return; // "Custom" — leave sizes as they are
+      const [w, h] = preset;
+      plImages[i].widthCm = w;
+      plImages[i].heightCm = h;
+      const row = e.target.closest('.pl-row');
+      row.querySelector('input[data-f="widthCm"]').value = w;
+      row.querySelector('input[data-f="heightCm"]').value = h;
+      updatePlRowWarning(i);
+    });
+  });
+  table.querySelectorAll('input[data-f="widthCm"], input[data-f="heightCm"]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const i = +e.target.dataset.i, f = e.target.dataset.f, v = +e.target.value;
+      if (!isNaN(v)) plImages[i][f] = v;
+      // Only fall back to "Custom" once the typed value actually diverges from
+      // the selected preset — re-typing the same number (or editing the other
+      // field back to match) should keep the preset selected.
+      plSyncPlSizePreset(i);
+      const row = e.target.closest('.pl-row');
+      const sel = row?.querySelector('.pl-size-select');
+      if (sel) sel.value = plImages[i].sizePreset || '';
+    });
+    inp.addEventListener('change', e => updatePlRowWarning(+e.target.dataset.i));
+  });
+  table.querySelectorAll('input[data-f="qty"]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const i = +e.target.dataset.i;
+      const v = Math.max(1, Math.round(+e.target.value));
+      if (!isNaN(v)) plImages[i].qty = v;
+      const total = plImages.reduce((s, p) => s + (p.qty || 0), 0);
+      const pill = document.getElementById('pl-pieces-pill');
+      if (total > plImages.length) {
+        pill.style.display = '';
+        document.getElementById('pl-pieces-count').textContent = total;
+      } else pill.style.display = 'none';
+    });
+  });
+  table.querySelectorAll('.pl-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      plImages.splice(+btn.dataset.i, 1);
+      renderPlTable();
+    });
+  });
+}
+
+function updatePlRowWarning(i) {
+  const p = plImages[i];
+  if (!p) return;
+  const nativeAspect = p.nativeW && p.nativeH ? p.nativeW / p.nativeH : null;
+  const targetAspect = p.widthCm && p.heightCm ? p.widthCm / p.heightCm : null;
+  const mismatch = nativeAspect && targetAspect && Math.abs(nativeAspect - targetAspect) / nativeAspect > 0.08;
+  const el = document.getElementById(`pl-warn-${i}`);
+  if (el) el.style.display = mismatch ? 'inline' : 'none';
+}
+
+// ── Queue / Layout view toggle ──
+function setPlView(mode) {
+  const isLayout = mode === 'layout';
+  document.getElementById('pl-queue-view').style.display  = isLayout ? 'none' : 'block';
+  document.getElementById('pl-layout-view').style.display = isLayout ? 'flex' : 'none';
+  document.getElementById('pl-view-queue-btn').classList.toggle('active', !isLayout);
+  document.getElementById('pl-view-layout-btn').classList.toggle('active', isLayout);
+}
+document.getElementById('pl-view-queue-btn').addEventListener('click', () => setPlView('queue'));
+document.getElementById('pl-view-layout-btn').addEventListener('click', () => {
+  if (!plLayout) { plLog('Run "Optimize Layout" first.', 'err'); return; }
+  setPlView('layout');
+});
+
+// ── Output folder ──
+document.getElementById('pl-pick-out').addEventListener('click', async () => {
+  if (!window.electronAPI) return;
+  const p = await window.electronAPI.selectOutputFolder();
+  if (p) { plOutFolder = p; document.getElementById('pl-out-path').textContent = p; }
+});
+document.getElementById('pl-open-btn').addEventListener('click', () => {
+  if (plOutFolder && window.electronAPI) window.electronAPI.openFolder(plOutFolder);
+});
+
+// ── Optimize Layout ──
+document.getElementById('pl-optimize-btn').addEventListener('click', async () => {
+  if (!plImages.length) { plLog('No posters added — drop some images first!', 'err'); return; }
+  const bad = plImages.find(p => !p.widthCm || !p.heightCm || p.widthCm <= 0 || p.heightCm <= 0);
+  if (bad) { plLog(`"${bad.name}" needs a valid width & height in cm`, 'err'); return; }
+
+  plPreviewBitmapCache.clear();
+  plFillBitmapCache.clear();
+  const totalPieces = plImages.reduce((s, p) => s + p.qty, 0);
+  plLog(`Nesting ${totalPieces} piece(s) onto a ${plRollWidth}cm roll...`, 'info');
+
+  const instances = [];
+  plImages.forEach((p, srcIdx) => {
+    for (let q = 0; q < p.qty; q++) instances.push({ srcIdx, w: p.widthCm, h: p.heightCm });
+  });
+  // Decreasing-longest-side first — a solid, well-known strip-packing heuristic
+  instances.sort((a, b) => Math.max(b.w, b.h) - Math.max(a.w, a.h) || (b.w * b.h) - (a.w * a.h));
+
+  const packer = new MaxRectsPacker(plRollWidth);
+  const placed = [];
+  const spacing = plSpacing;
+  let skipped = 0;
+  for (const inst of instances) {
+    const res = packer.place(inst.w + spacing, inst.h + spacing, plAllowRotate);
+    if (!res) { skipped++; continue; }
+    placed.push({ x: res.x, y: res.y, w: res.w - spacing, h: res.h - spacing, rotated: res.rotated, srcIdx: inst.srcIdx });
+  }
+  if (skipped) plLog(`${skipped} piece(s) wider than the ${plRollWidth}cm roll couldn't be placed.`, 'err');
+  if (!placed.length) { plLog('Nothing could be placed. Check your sizes vs roll width.', 'err'); return; }
+
+  const tightLengthCm = Math.max(...placed.map(p => p.y + p.h));
+  // Rolls are cut/billed in whole-meter increments along their length — the
+  // width is a fixed roll spec, but the length always rounds UP to the next
+  // full meter (1.18m of content still costs/consumes a 2.00m cut).
+  const ROLL_LENGTH_STEP_CM = 100;
+  const usedLengthCm = Math.ceil(tightLengthCm / ROLL_LENGTH_STEP_CM) * ROLL_LENGTH_STEP_CM;
+
+  const MIN_POCKET_CM2 = 300; // ~0.03 m² — below this a gap isn't worth listing
+  const pockets = packer.freeRects
+    .map(fr => ({ x: fr.x, y: fr.y, w: fr.w, h: Math.min(fr.h, tightLengthCm - fr.y) }))
+    .filter(fr => fr.h > 0.5 && fr.w > 0.5 && fr.w * fr.h >= MIN_POCKET_CM2)
+    .sort((a, b) => (b.w * b.h) - (a.w * a.h));
+  // The stretch of roll between the tight nest and the rounded-up cut length
+  // is real, billed, wasted paper too — surface it as a pocket like any other gap.
+  if (usedLengthCm > tightLengthCm) {
+    pockets.unshift({ x: 0, y: tightLengthCm, w: plRollWidth, h: usedLengthCm - tightLengthCm });
+  }
+
+  const tightLengthM = tightLengthCm / 100;
+  const usedLengthM  = usedLengthCm / 100;
+  const billedAreaM2 = (plRollWidth / 100) * usedLengthM;
+  const posterAreaM2 = placed.reduce((s, p) => s + p.w * p.h, 0) / 10000;
+  const emptyAreaM2  = Math.max(0, billedAreaM2 - posterAreaM2);
+  const wastePct     = billedAreaM2 > 0 ? (emptyAreaM2 / billedAreaM2 * 100) : 0;
+  const totalCost   = plPriceMeter ? usedLengthM * plPriceMeter : null;
+  const wastedCost  = totalCost != null ? (wastePct / 100) * totalCost : null;
+
+  plLayout = {
+    rollWidthCm: plRollWidth, usedLengthCm, tightLengthCm, placed, pockets,
+    // basePosterAreaM2 stays fixed at the nested-posters-only figure; posterAreaM2
+    // grows as pockets get filled (see recomputePlFillStats) while basePosterAreaM2
+    // remains the reference point for that recompute.
+    stats: { rollWidthCm: plRollWidth, tightLengthM, usedLengthM, billedAreaM2, posterAreaM2, basePosterAreaM2: posterAreaM2, emptyAreaM2, wastePct, pricePerMeter: plPriceMeter, totalCost, wastedCost },
+  };
+
+  plLog(`Nested ${placed.length} piece(s) into ${tightLengthM.toFixed(2)}m of content — roll cuts at ${usedLengthM.toFixed(2)}m (rounded up to the next meter) — ${wastePct.toFixed(1)}% empty space.`, 'ok');
+
+  await renderPlLayoutView();
+  setPlView('layout');
+  document.getElementById('pl-export-btn').disabled = false;
+});
+
+async function renderPlLayoutView() {
+  document.getElementById('pl-layout-hint').style.display = 'none';
+  document.getElementById('pl-layout-content').style.display = 'block';
+  renderPlStats();
+  renderPlPockets();
+  await drawPlLayout();
+}
+
+function renderPlStats() {
+  const s = plLayout.stats;
+  const grid = document.getElementById('pl-stats-grid');
+  const cards = [
+    ['Content Length', s.tightLengthM.toFixed(2) + ' m'],
+    ['Roll Length (cut)', s.usedLengthM.toFixed(2) + ' m'],
+    ['Roll Width', (s.rollWidthCm / 100).toFixed(2) + ' m'],
+    ['Paper Billed', s.billedAreaM2.toFixed(2) + ' m²'],
+    ['Poster Coverage', s.posterAreaM2.toFixed(2) + ' m²'],
+    ['Empty / Wasted', s.emptyAreaM2.toFixed(2) + ' m²'],
+    ['Waste %', s.wastePct.toFixed(1) + '%'],
+  ];
+  if (s.pricePerMeter) {
+    cards.push(['Est. Cost', s.totalCost.toFixed(2)]);
+    cards.push(['Cost of Waste', s.wastedCost.toFixed(2)]);
+  }
+  grid.innerHTML = cards.map(([label, val]) => {
+    let cls = '';
+    if (label === 'Waste %') cls = s.wastePct > 25 ? 'warn' : (s.wastePct < 10 ? 'good' : '');
+    return `<div class="pl-stat-card"><div class="pl-stat-label">${label}</div><div class="pl-stat-value ${cls}">${val}</div></div>`;
+  }).join('');
+}
+
+function renderPlPockets() {
+  const wrap = document.getElementById('pl-pockets');
+  wrap.innerHTML = '';
+  if (!plLayout.pockets.length) {
+    wrap.innerHTML = '<div class="pl-empty-hint">Tight nest — no significant empty pockets found. 🎉</div>';
+    return;
+  }
+  plLayout.pockets.forEach((p, i) => {
+    const areaM2 = (p.w * p.h / 10000).toFixed(2);
+    const row = document.createElement('div');
+    row.className = 'pl-pocket-row' + (p.fill ? ' filled' : '');
+    row.title = p.fill ? 'Click to replace this fill — right-click to remove it' : 'Click to fill this pocket with an image';
+    row.innerHTML = `
+      <div class="pl-pocket-thumb">${p.fill?.dataUrl ? `<img src="${p.fill.dataUrl}" alt=""/>` : '<i class="ti ti-photo-plus"></i>'}</div>
+      <div class="pl-pocket-info">
+        <span class="pl-pocket-size">${(p.h / 100).toFixed(2)}m long × ${(p.w / 100).toFixed(2)}m wide <span style="color:var(--text3);font-weight:400">(${areaM2} m²)</span></span>
+        <span class="pl-pocket-pos">${p.fill ? `Filled — ${p.fill.name}` : `at ${(p.y / 100).toFixed(2)}m along the roll`}</span>
+      </div>
+      ${p.fill ? '<button class="pl-pocket-clear" title="Remove fill"><i class="ti ti-x"></i></button>' : ''}
+    `;
+    row.addEventListener('click', e => {
+      if (e.target.closest('.pl-pocket-clear')) return;
+      plOpenFillPicker(i);
+    });
+    row.addEventListener('contextmenu', e => { e.preventDefault(); plClearPocketFill(i); });
+    const clearBtn = row.querySelector('.pl-pocket-clear');
+    if (clearBtn) clearBtn.addEventListener('click', e => { e.stopPropagation(); plClearPocketFill(i); });
+    wrap.appendChild(row);
+  });
+}
+
+// ── Pocket fill tool — pick an image to print into a specific empty pocket ──
+// Selectable from either the pockets list above or directly on the canvas
+// (see the click-vs-drag hit-testing in setupPlMeasureTool below).
+function plOpenFillPicker(pocketIdx) {
+  if (!plLayout?.pockets?.[pocketIdx]) return;
+  plActiveFillPocketIdx = pocketIdx;
+  document.getElementById('pl-fill-file-input').click();
+}
+
+document.getElementById('pl-fill-file-input').addEventListener('change', async e => {
+  const f = e.target.files[0];
+  e.target.value = ''; // reset so picking the same file again still fires 'change'
+  const pocketIdx = plActiveFillPocketIdx;
+  plActiveFillPocketIdx = null;
+  if (!f || pocketIdx == null || !plLayout?.pockets?.[pocketIdx]) return;
+
+  const filePath = window.electronAPI?.getFilePath ? window.electronAPI.getFilePath(f) : (f.path || null);
+  if (!filePath) { plLog('Could not resolve a file path for that image — try dropping it from disk instead.', 'err'); return; }
+
+  const pocket = plLayout.pockets[pocketIdx];
+  let dataUrl = null;
+  try { dataUrl = await makeThumbnail(f); } catch (err) { /* thumb is cosmetic only */ }
+  pocket.fill = { file: f, filePath, name: f.name, dataUrl };
+  plFillBitmapCache.delete(pocketIdx);
+
+  plLog(`✓ Filled pocket (${(pocket.h / 100).toFixed(2)}m × ${(pocket.w / 100).toFixed(2)}m) with "${f.name}"`, 'ok');
+  recomputePlFillStats();
+  renderPlStats();
+  renderPlPockets();
+  await drawPlLayout();
+});
+
+function plClearPocketFill(pocketIdx) {
+  const pocket = plLayout?.pockets?.[pocketIdx];
+  if (!pocket?.fill) return;
+  pocket.fill = null;
+  plFillBitmapCache.delete(pocketIdx);
+  recomputePlFillStats();
+  renderPlStats();
+  renderPlPockets();
+  drawPlLayout();
+}
+
+// Filled pockets count toward "Poster Coverage" just like nested posters do —
+// basePosterAreaM2 (set once, at Optimize Layout time) is the fixed reference
+// point this adds back on top of, so re-deriving never compounds.
+function recomputePlFillStats() {
+  const s = plLayout.stats;
+  const filledAreaM2 = plLayout.pockets.reduce((sum, p) => sum + (p.fill ? p.w * p.h / 10000 : 0), 0);
+  s.filledAreaM2 = filledAreaM2;
+  s.posterAreaM2 = s.basePosterAreaM2 + filledAreaM2;
+  s.emptyAreaM2  = Math.max(0, s.billedAreaM2 - s.posterAreaM2);
+  s.wastePct     = s.billedAreaM2 > 0 ? (s.emptyAreaM2 / s.billedAreaM2 * 100) : 0;
+  s.wastedCost   = s.totalCost != null ? (s.wastePct / 100) * s.totalCost : null;
+}
+
+// Draws imgEl scaled uniformly to cover the (x,y,w,h) box, centered, cropping
+// any overflow — never distorts the source image's aspect ratio. Works with
+// both <img> elements and ImageBitmaps (width/height vs naturalWidth/naturalHeight).
+function drawPlImageCover(ctx, imgEl, x, y, w, h) {
+  const iw = imgEl.naturalWidth || imgEl.width, ih = imgEl.naturalHeight || imgEl.height;
+  const ir = iw / ih;
+  const br = w / h;
+  let dw, dh, dx, dy;
+  if (ir > br) {
+    dh = h; dw = h * ir;
+    dx = x - (dw - w) / 2; dy = y;
+  } else {
+    dw = w; dh = w / ir;
+    dx = x; dy = y - (dh - h) / 2;
+  }
+  ctx.drawImage(imgEl, dx, dy, dw, dh);
+}
+
+// Full-resolution-ish bitmap for the layout preview (capped at 1600px on the
+// long side) — decoded straight from the original source File, not the tiny
+// ~240px queue-list thumbnail, so posters don't look blocky once scaled up
+// to fill their (often much larger) on-canvas footprint. Shared by both
+// nested posters and pocket fills below.
+async function loadCappedPlBitmap(file) {
+  try {
+    const full = await createImageBitmap(file);
+    const maxDim = 1600;
+    if (Math.max(full.width, full.height) <= maxDim) return full;
+    const scale = maxDim / Math.max(full.width, full.height);
+    const w = Math.max(1, Math.round(full.width * scale));
+    const h = Math.max(1, Math.round(full.height * scale));
+    const resized = await createImageBitmap(full, { resizeWidth: w, resizeHeight: h, resizeQuality: 'high' });
+    full.close?.();
+    return resized;
+  } catch (e) {
+    return null; // falls back to the flat color swatch / hatch in drawPlLayout
+  }
+}
+
+async function getPlPreviewBitmap(srcIdx) {
+  if (plPreviewBitmapCache.has(srcIdx)) return plPreviewBitmapCache.get(srcIdx);
+  const promise = loadCappedPlBitmap(plImages[srcIdx].file);
+  plPreviewBitmapCache.set(srcIdx, promise);
+  return promise;
+}
+
+async function getPlFillBitmap(pocketIdx, fillFile) {
+  if (plFillBitmapCache.has(pocketIdx)) return plFillBitmapCache.get(pocketIdx);
+  const promise = loadCappedPlBitmap(fillFile);
+  plFillBitmapCache.set(pocketIdx, promise);
+  return promise;
+}
+
+async function drawPlLayout() {
+  const layout = plLayout;
+  const canvas = document.getElementById('pl-canvas-el');
+  const ctx = canvas.getContext('2d');
+
+  let pxPerCm = Math.max(1.5, Math.min(8, 700 / layout.rollWidthCm));
+  if (layout.usedLengthCm * pxPerCm > 30000) pxPerCm = 30000 / layout.usedLengthCm;
+
+  const marginL = 34, marginT = 10, marginB = 26;
+  plCanvasMeta = { pxPerCm, marginL, marginT }; // consumed by the measuring tool below
+  const rollWidthPx = layout.rollWidthCm * pxPerCm;
+  const lengthPx    = layout.usedLengthCm * pxPerCm;
+  canvas.width  = Math.ceil(lengthPx + marginL + 10);
+  canvas.height = Math.ceil(rollWidthPx + marginT + marginB);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#161616';
+  ctx.fillRect(marginL, marginT, lengthPx, rollWidthPx);
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(marginL, marginT, lengthPx, rollWidthPx);
+
+  ctx.font = '9px monospace';
+  const step = layout.usedLengthCm > 400 ? 100 : 50;
+  for (let cm = 0; cm <= layout.usedLengthCm; cm += step) {
+    const x = marginL + cm * pxPerCm;
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.beginPath(); ctx.moveTo(x, marginT); ctx.lineTo(x, marginT + rollWidthPx); ctx.stroke();
+    ctx.fillStyle = '#666';
+    ctx.fillText((cm / 100).toFixed(1) + 'm', x + 2, marginT + rollWidthPx + 15);
+  }
+
+  const uniqueSrc = [...new Set(layout.placed.map(p => p.srcIdx))];
+  const bitmaps = {};
+  const fillBitmaps = {};
+  await Promise.all([
+    ...uniqueSrc.map(async i => { bitmaps[i] = await getPlPreviewBitmap(i); }),
+    ...layout.pockets.map(async (p, i) => { if (p.fill) fillBitmaps[i] = await getPlFillBitmap(i, p.fill.file); }),
+  ]);
+
+  layout.pockets.forEach((p, i) => {
+    const x = marginL + p.y * pxPerCm, y = marginT + p.x * pxPerCm;
+    const w = p.h * pxPerCm, h = p.w * pxPerCm;
+    const fillImg = p.fill ? fillBitmaps[i] : null;
+    if (fillImg && fillImg.width) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x, y, w, h);
+      ctx.clip();
+      drawPlImageCover(ctx, fillImg, x, y, w, h);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(76,229,150,0.85)'; // green = filled, distinct from a nested poster's black border
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x, y, w, h);
+    } else {
+      ctx.fillStyle = 'rgba(180,124,255,0.14)';
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = 'rgba(180,124,255,0.5)';
+      ctx.setLineDash([4, 3]);
+      ctx.strokeRect(x, y, w, h);
+      ctx.setLineDash([]);
+    }
+  });
+
+  // NOTE on rotation: the roll here is drawn as a horizontal strip (roll
+  // width = vertical screen axis, roll length = horizontal screen axis) —
+  // the opposite of the packer's own axes, which run roll-width along x and
+  // length along y. Because of that swap, a piece the packer did NOT rotate
+  // (its own width sits on the packer's x/roll-width axis, matching the
+  // *vertical* axis here) needs a 90° draw-rotation to render upright on
+  // this horizontal strip; a piece the packer DID rotate needs none. This
+  // is a preview-only rendering detail — the exported PDF maps roll space
+  // 1:1 (no swap) and uses the inverse of this rule, matching how the piece
+  // actually sits on the physical roll.
+  const palette = ['#b47cff', '#47c8ff', '#4caf7d', '#ff6b35', '#e8ff47', '#e05555'];
+  layout.placed.forEach(p => {
+    const x = marginL + p.y * pxPerCm, y = marginT + p.x * pxPerCm;
+    const w = p.h * pxPerCm, h = p.w * pxPerCm;
+    const imgEl = bitmaps[p.srcIdx];
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.clip();
+    if (imgEl && imgEl.width) {
+      if (!p.rotated) {
+        ctx.translate(x + w / 2, y + h / 2);
+        ctx.rotate(Math.PI / 2);
+        drawPlImageCover(ctx, imgEl, -h / 2, -w / 2, h, w);
+      } else {
+        drawPlImageCover(ctx, imgEl, x, y, w, h);
+      }
+    } else {
+      ctx.fillStyle = palette[p.srcIdx % palette.length] + '33';
+      ctx.fillRect(x, y, w, h);
+    }
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, w, h);
+  });
+
+  // Snapshot the clean render so the measuring tool can cheaply restore it on
+  // every mousemove instead of re-running this whole (async, bitmap-loading)
+  // draw again — and drop any in-progress measurement, since the geometry
+  // underneath it just changed.
+  plSnapshotCanvas(canvas);
+  plMeasure = null;
+}
+
+// ── Measuring tape tool — layout preview only ──
+// Drag on the canvas to pull a dotted tape from the click point to the
+// current cursor position, live-labeled with the real-world distance (using
+// the same pxPerCm scale the layout itself was drawn at).
+let plCanvasMeta = null; // { pxPerCm, marginL, marginT } from the last drawPlLayout()
+let plCanvasBase = null; // offscreen snapshot of the last clean render (no overlay)
+let plMeasure    = null; // { x0, y0, x1, y1 } in canvas px, while/after dragging
+
+function plSnapshotCanvas(canvas) {
+  if (!plCanvasBase) plCanvasBase = document.createElement('canvas');
+  plCanvasBase.width = canvas.width;
+  plCanvasBase.height = canvas.height;
+  plCanvasBase.getContext('2d').drawImage(canvas, 0, 0);
+}
+
+function plRestoreCanvas(canvas) {
+  if (!plCanvasBase) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(plCanvasBase, 0, 0);
+}
+
+function plFormatCm(cm) {
+  return cm >= 100 ? (cm / 100).toFixed(2) + ' m' : cm.toFixed(1) + ' cm';
+}
+
+function plDrawMeasureOverlay() {
+  if (!plMeasure || !plCanvasMeta) return;
+  const canvas = document.getElementById('pl-canvas-el');
+  const ctx = canvas.getContext('2d');
+  plRestoreCanvas(canvas);
+
+  const { x0, y0, x1, y1 } = plMeasure;
+  const distCm = Math.hypot(x1 - x0, y1 - y0) / plCanvasMeta.pxPerCm;
+  const label = plFormatCm(distCm);
+
+  ctx.save();
+  ctx.strokeStyle = '#ffe147';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  ctx.moveTo(x0, y0);
+  ctx.lineTo(x1, y1);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  [[x0, y0], [x1, y1]].forEach(([x, y]) => {
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffe147';
+    ctx.fill();
+  });
+
+  ctx.font = 'bold 11px monospace';
+  const padX = 6, boxH = 18;
+  const tw = ctx.measureText(label).width;
+  let lx = x1 + 10, ly = y1 - 10; // ly = text baseline
+  if (lx + tw + padX * 2 > canvas.width) lx = x1 - tw - padX * 2 - 10;
+  if (ly - boxH < 0) ly = y1 + 22;
+
+  ctx.fillStyle = 'rgba(0,0,0,0.75)';
+  ctx.fillRect(lx - padX, ly - boxH, tw + padX * 2, boxH);
+  ctx.strokeStyle = '#ffe147';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(lx - padX, ly - boxH, tw + padX * 2, boxH);
+  ctx.fillStyle = '#ffe147';
+  ctx.fillText(label, lx, ly - 4);
+  ctx.restore();
+}
+
+function plClearMeasure() {
+  if (!plMeasure) return;
+  plMeasure = null;
+  const canvas = document.getElementById('pl-canvas-el');
+  plRestoreCanvas(canvas);
+}
+
+// Returns the index into plLayout.pockets under canvas-pixel (px, py), or -1.
+function plHitTestPocket(px, py) {
+  if (!plLayout || !plCanvasMeta) return -1;
+  const { pxPerCm, marginL, marginT } = plCanvasMeta;
+  for (let i = 0; i < plLayout.pockets.length; i++) {
+    const p = plLayout.pockets[i];
+    const x = marginL + p.y * pxPerCm, y = marginT + p.x * pxPerCm;
+    const w = p.h * pxPerCm, h = p.w * pxPerCm;
+    if (px >= x && px <= x + w && py >= y && py <= y + h) return i;
+  }
+  return -1;
+}
+
+(function setupPlMeasureTool() {
+  const canvas = document.getElementById('pl-canvas-el');
+  canvas.style.cursor = 'crosshair';
+  let dragging = false;
+  let downX = 0, downY = 0;
+  const CLICK_SLOP_PX = 5; // movement under this = a click (select a pocket), not a drag (measure)
+
+  canvas.addEventListener('mousedown', e => {
+    if (!plCanvasMeta || e.button !== 0) return;
+    dragging = true;
+    downX = e.offsetX; downY = e.offsetY;
+    plMeasure = { x0: downX, y0: downY, x1: downX, y1: downY };
+    plDrawMeasureOverlay();
+  });
+  canvas.addEventListener('mousemove', e => {
+    if (!dragging || !plMeasure) return;
+    plMeasure.x1 = e.offsetX;
+    plMeasure.y1 = e.offsetY;
+    plDrawMeasureOverlay();
+  });
+  window.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    const moved = plMeasure ? Math.hypot(plMeasure.x1 - downX, plMeasure.y1 - downY) : Infinity;
+    if (moved < CLICK_SLOP_PX) {
+      plClearMeasure(); // it was a click, not a real drag — don't leave a stray zero-length line
+      const pocketIdx = plHitTestPocket(downX, downY);
+      if (pocketIdx !== -1) plOpenFillPicker(pocketIdx);
+    }
+  });
+  canvas.addEventListener('dblclick', plClearMeasure);
+  canvas.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    const pocketIdx = plHitTestPocket(e.offsetX, e.offsetY);
+    if (pocketIdx !== -1 && plLayout?.pockets[pocketIdx]?.fill) plClearPocketFill(pocketIdx);
+    else plClearMeasure();
+  });
+})();
+
+// ── Export: print-ready files + cut list CSV + layout preview PNG ──
+document.getElementById('pl-export-btn').addEventListener('click', async () => {
+  if (!plLayout) { plLog('Optimize the layout first.', 'err'); return; }
+  if (!plOutFolder) { plLog('Choose an output folder first.', 'err'); return; }
+  if (!window.electronAPI?.plotterExportPoster) { plLog('Electron API not available.', 'err'); return; }
+  const usedSrcIdx = new Set(plLayout.placed.map(p => p.srcIdx));
+  const missing = plImages.find((p, i) => usedSrcIdx.has(i) && !p.filePath);
+  if (missing) { plLog(`"${missing.name}" has no file path — re-add it by dropping from disk.`, 'err'); return; }
+  const filledPockets = plLayout.pockets.filter(p => p.fill);
+  const missingFill = filledPockets.find(p => !p.fill.filePath);
+  if (missingFill) { plLog(`Pocket fill "${missingFill.fill.name}" has no file path — re-pick it by dropping from disk.`, 'err'); return; }
+
+  const btn    = document.getElementById('pl-export-btn');
+  const fillEl = document.getElementById('pl-progress-fill');
+  const msgEl  = document.getElementById('pl-progress-msg');
+  btn.disabled = true;
+  fillEl.classList.add('active');
+  plLog('Building print_layout.pdf — the single file for your print shop...', 'info');
+
+  const sep = plOutFolder.includes('\\') ? '\\' : '/';
+
+  // ── The main deliverable: one PDF, one page sized to the roll, every ──
+  // poster embedded at full source resolution in its nested position/orientation.
+  msgEl.textContent = 'Assembling combined layout PDF...';
+  fillEl.style.width = '10%';
+  const pdfItems = plLayout.placed.map(pl => ({
+    filePath: plImages[pl.srcIdx].filePath,
+    xCm: pl.x, yCm: pl.y, wCm: pl.w, hCm: pl.h, rotated: pl.rotated,
+  }));
+  // Filled pockets get embedded too — sized to the pocket itself, no rotation
+  // (a pocket has no "natural" orientation the way a poster does).
+  filledPockets.forEach(p => {
+    pdfItems.push({ filePath: p.fill.filePath, xCm: p.x, yCm: p.y, wCm: p.w, hCm: p.h, rotated: false });
+  });
+  const pdfRes = await window.electronAPI.plotterExportPdf({
+    items: pdfItems, rollWidthCm: plLayout.rollWidthCm, usedLengthCm: plLayout.usedLengthCm,
+    outputDir: plOutFolder, fileName: 'print_layout.pdf',
+  });
+  if (pdfRes.error) {
+    plLog(`Error building print_layout.pdf: ${pdfRes.error}`, 'err');
+  } else if (pdfRes.placedCount === 0) {
+    plLog(`print_layout.pdf was written but is EMPTY — none of the ${pdfRes.totalCount} poster(s) could be placed:`, 'err');
+    (pdfRes.errors || []).forEach(e => plLog(`  ✗ ${e.file}: ${e.message}`, 'err'));
+  } else if (pdfRes.placedCount < pdfRes.totalCount) {
+    plLog(`⚠ print_layout.pdf saved, but only ${pdfRes.placedCount}/${pdfRes.totalCount} posters could be placed:`, 'err');
+    (pdfRes.errors || []).forEach(e => plLog(`  ✗ ${e.file}: ${e.message}`, 'err'));
+  } else {
+    plLog(`✓ print_layout.pdf — hand this single file to your print shop`, 'ok');
+  }
+
+  msgEl.textContent = 'Rendering individual print-ready files...';
+  fillEl.style.width = '30%';
+  plLog('Also exporting individual print-ready files + cut list (optional extras)...', 'info');
+
+  const uniqueSrcIdx = [...usedSrcIdx];
+  const exportTotal = uniqueSrcIdx.length + filledPockets.length;
+  const exportedFiles = {};
+  const exportedFillFiles = {}; // keyed by index into plLayout.pockets
+  let done = 0;
+  for (const idx of uniqueSrcIdx) {
+    const p = plImages[idx];
+    msgEl.textContent = `Rendering ${p.name}...`;
+    fillEl.style.width = `${30 + Math.round(done / exportTotal * 50)}%`;
+    const res = await window.electronAPI.plotterExportPoster({
+      filePath: p.filePath, name: p.name, outputDir: plOutFolder,
+      widthCm: p.widthCm, heightCm: p.heightCm, dpi: plDpi,
+    });
+    if (res.error) plLog(`Error exporting ${p.name}: ${res.error}`, 'err');
+    else { exportedFiles[idx] = res.outFile; plLog(`✓ ${p.name} → ${res.widthPx}×${res.heightPx}px`, 'ok'); }
+    done++;
+  }
+  for (const p of filledPockets) {
+    const pocketIdx = plLayout.pockets.indexOf(p);
+    msgEl.textContent = `Rendering pocket fill ${p.fill.name}...`;
+    fillEl.style.width = `${30 + Math.round(done / exportTotal * 50)}%`;
+    const res = await window.electronAPI.plotterExportPoster({
+      filePath: p.fill.filePath, name: p.fill.name, outputDir: plOutFolder,
+      widthCm: p.w, heightCm: p.h, dpi: plDpi,
+    });
+    if (res.error) plLog(`Error exporting pocket fill ${p.fill.name}: ${res.error}`, 'err');
+    else { exportedFillFiles[pocketIdx] = res.outFile; plLog(`✓ ${p.fill.name} (pocket fill) → ${res.widthPx}×${res.heightPx}px`, 'ok'); }
+    done++;
+  }
+
+  const rows = [['#', 'poster', 'x_along_roll_cm', 'y_across_roll_cm', 'length_cm', 'width_cm', 'rotated', 'source_file']];
+  plLayout.placed.forEach((pl, i) => {
+    const p = plImages[pl.srcIdx];
+    rows.push([i + 1, p.name, pl.y.toFixed(1), pl.x.toFixed(1), pl.h.toFixed(1), pl.w.toFixed(1), pl.rotated ? 'yes' : 'no', exportedFiles[pl.srcIdx] || '']);
+  });
+  plLayout.pockets.forEach((p, i) => {
+    if (!p.fill) return;
+    rows.push([`fill-${i + 1}`, `${p.fill.name} (pocket fill)`, p.y.toFixed(1), p.x.toFixed(1), p.h.toFixed(1), p.w.toFixed(1), 'no', exportedFillFiles[i] || '']);
+  });
+  const csv = rows.map(r => r.map(c => /[",\n]/.test(String(c)) ? `"${String(c).replace(/"/g, '""')}"` : c).join(',')).join('\n');
+  if (window.electronAPI?.writeTextFile) {
+    await window.electronAPI.writeTextFile({ filePath: plOutFolder + sep + 'cut_list.csv', content: csv });
+    plLog('✓ cut_list.csv written', 'ok');
+  }
+
+  msgEl.textContent = 'Saving layout preview...';
+  fillEl.style.width = '90%';
+  const canvas = document.getElementById('pl-canvas-el');
+  const base64 = canvas.toDataURL('image/png').split(',')[1];
+  await window.electronAPI.writeFileBase64({ filePath: plOutFolder + sep + 'layout_preview.png', base64 });
+  plLog('✓ layout_preview.png written', 'ok');
+
+  fillEl.style.width = '100%';
+  fillEl.classList.remove('active');
+  msgEl.textContent = 'Export complete';
+  document.getElementById('pl-progress-count').textContent = '';
+  btn.disabled = false;
+  document.getElementById('pl-open-btn').disabled = false;
+  const fillNote = filledPockets.length ? ` + ${filledPockets.length} pocket fill(s)` : '';
+  plLog(`Done — print_layout.pdf (the file for your print shop), ${uniqueSrcIdx.length} individual print-ready file(s)${fillNote}, cut list, and a layout preview all saved to ${plOutFolder}`, 'ok');
+});
+
+document.getElementById('pl-clear-btn').addEventListener('click', () => {
+  plImages.length = 0;
+  plLayout = null;
+  plPreviewBitmapCache.clear();
+  plFillBitmapCache.clear();
+  renderPlTable();
+  setPlView('queue');
+  document.getElementById('pl-layout-hint').style.display = 'block';
+  document.getElementById('pl-layout-content').style.display = 'none';
+  document.getElementById('pl-export-btn').disabled = true;
+  document.getElementById('pl-open-btn').disabled = true;
+  document.getElementById('pl-progress-fill').style.width = '0%';
+  document.getElementById('pl-progress-msg').textContent = 'Ready';
+  document.getElementById('pl-progress-count').textContent = '';
+});
 </script>
 </body>
 </html>
