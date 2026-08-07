@@ -3189,6 +3189,9 @@ document.querySelectorAll('#pl-dpi-tabs .opt-tab').forEach(btn => {
     document.querySelectorAll('#pl-dpi-tabs .opt-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     plDpi = +btn.dataset.dpi;
+    // Every row's "can this image actually hit the target DPI" warning is
+    // relative to plDpi — recheck them all now that it changed.
+    plImages.forEach((_, i) => updatePlRowWarning(i));
   });
 });
 
@@ -3269,11 +3272,13 @@ function renderPlTable() {
     const nativeAspect = p.nativeW && p.nativeH ? p.nativeW / p.nativeH : null;
     const targetAspect = p.widthCm && p.heightCm ? p.widthCm / p.heightCm : null;
     const mismatch = nativeAspect && targetAspect && Math.abs(nativeAspect - targetAspect) / nativeAspect > 0.08;
+    const effDpi = plEffectiveDpi(p);
+    const dpiShort = effDpi != null && effDpi < plDpi - 0.5;
     const row = document.createElement('div');
     row.className = 'pl-row';
     row.innerHTML = `
       <div class="pl-thumb">${p.dataUrl ? `<img src="${p.dataUrl}" alt="" loading="lazy"/>` : ''}</div>
-      <div class="pl-name" title="${p.name}">${p.name}<span class="pl-warn" id="pl-warn-${i}" style="display:${mismatch ? 'inline' : 'none'}" title="Print size doesn't match the image's own aspect ratio — it'll be cropped to fit, not stretched">⚠</span></div>
+      <div class="pl-name" title="${p.name}">${p.name}<span class="pl-warn" id="pl-warn-${i}" style="display:${mismatch ? 'inline' : 'none'}" title="Print size doesn't match the image's own aspect ratio — it'll be cropped to fit, not stretched">⚠</span><span class="pl-warn pl-dpi-warn" id="pl-dpi-warn-${i}" style="display:${dpiShort ? 'inline' : 'none'}" title="${dpiShort ? plDpiWarnText(effDpi) : ''}">🔍</span></div>
       <select class="pl-size-select" data-i="${i}" title="Standard size — auto-fills W × H">
         <option value="">Custom</option>
         <option value="A0">A0</option>
@@ -3354,6 +3359,28 @@ function updatePlRowWarning(i) {
   const mismatch = nativeAspect && targetAspect && Math.abs(nativeAspect - targetAspect) / nativeAspect > 0.08;
   const el = document.getElementById(`pl-warn-${i}`);
   if (el) el.style.display = mismatch ? 'inline' : 'none';
+
+  const dpiEl = document.getElementById(`pl-dpi-warn-${i}`);
+  if (dpiEl) {
+    const effDpi = plEffectiveDpi(p);
+    const short = effDpi != null && effDpi < plDpi - 0.5;
+    dpiEl.style.display = short ? 'inline' : 'none';
+    dpiEl.title = short ? plDpiWarnText(effDpi) : '';
+  }
+}
+
+// The highest DPI a poster's native pixels can actually deliver at its
+// chosen print size — the limiting (smaller) of the width/height ratios,
+// since 'cover' fit crops to whichever dimension is tighter.
+function plEffectiveDpi(p) {
+  if (!p.nativeW || !p.nativeH || !p.widthCm || !p.heightCm) return null;
+  const wDpi = p.nativeW / (p.widthCm / 2.54);
+  const hDpi = p.nativeH / (p.heightCm / 2.54);
+  return Math.min(wDpi, hDpi);
+}
+
+function plDpiWarnText(effDpi) {
+  return `Source image only supports ~${Math.round(effDpi)} DPI at this print size — exporting at ${plDpi} DPI will upscale (soften) it, not add real detail`;
 }
 
 // ── Queue / Layout view toggle ──
